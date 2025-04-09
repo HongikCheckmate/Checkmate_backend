@@ -27,7 +27,7 @@ public class UserController {
         userService.create(signUpForm.getUsername(),
                 signUpForm.getEmail(), signUpForm.getPassword(), signUpForm.getPhone_number());
 
-        return "redirect:/";
+        return "redirect:/user/login";
     }
 
     @GetMapping("/login")
