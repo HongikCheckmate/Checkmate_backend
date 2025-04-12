@@ -14,9 +14,12 @@ public class SiteUser {
     private Long id;
 
     @Column(unique = true)
-    private String username;
+    private String username; //로그인 ID
 
     private String password;
+
+    @Column(unique = true)
+    private String nickname;
 
     @Column(unique = true)
     private String email;
