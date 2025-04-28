@@ -1,6 +1,8 @@
 package project.project1.group;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import project.project1.user.SiteUser;
@@ -41,7 +43,7 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public List<Group> searchGroupsByName(String keyword){
-        return groupRepository.findByNameContaining(keyword);
+    public Page<Group> searchGroupsByName(String keyword, Pageable pageable){
+        return groupRepository.findByNameContaining(keyword, pageable);
     }
 }

@@ -1,5 +1,8 @@
 package project.project1.group;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -70,9 +73,13 @@ public class GroupController {
 
     // 그룹 검색
     @GetMapping("/search")
-    public String searchGroups(@RequestParam("keyword") String keyword, Model model) {
-        List<Group> searchResults = groupService.searchGroupsByName(keyword);
+    public String searchGroups(@RequestParam("keyword") String keyword,
+                               @PageableDefault(size = 10) Pageable pageable,
+                               Model model) {
+        Page<Group> searchResults = groupService.searchGroupsByName(keyword, pageable);
         model.addAttribute("groups", searchResults);
+        model.addAttribute("page", searchResults);
+        model.addAttribute("keyword", keyword);
         return "group/list";  // 그룹 리스트 템플릿 재사용
     }
 }

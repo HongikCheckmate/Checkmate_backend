@@ -34,6 +34,7 @@
 </head>
 <body>
 <h1>그룹 목록</h1>
+
 <table>
     <thead>
     <tr>
@@ -52,6 +53,17 @@
     </tr>
     </tbody>
 </table>
+<div>
+  <span th:if="${page.hasPrevious()}">
+    <a th:href="@{/groups/search(keyword=${keyword}, page=${page.number - 1}, size=${page.size})}">이전</a>
+  </span>
+
+    <span>페이지 [[${page.number}]] / [[${page.totalPages}]]</span>
+
+    <span th:if="${page.hasNext()}">
+    <a th:href="@{/groups/search(keyword=${keyword}, page=${page.number + 1}, size=${page.size})}">다음</a>
+  </span>
+</div>
 <a class="btn" th:href="@{/groups/create}">새 그룹 생성하기</a>
 </body>
 </html>
