@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>그룹 목록</title>
+    <style>
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 20px auto;
+        }
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        h1 {
+            text-align: center;
+        }
+        .btn {
+            margin: 20px auto;
+            display: block;
+            text-align: center;
+            padding: 8px 16px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<h1>그룹 목록</h1>
+<table>
+    <thead>
+    <tr>
+        <th>그룹 ID</th>
+        <th>그룹 이름</th>
+        <th>설명</th>
+        <th>방장</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="group : ${groups}">
+        <td th:text="${group.id}">1</td>
+        <td th:text="${group.name}">그룹이름</td>
+        <td th:text="${group.description}">설명</td>
+        <td th:text="${group.manager.username}">방장이름</td>
+    </tr>
+    </tbody>
+</table>
+<a class="btn" th:href="@{/groups/create}">새 그룹 생성하기</a>
+</body>
+</html>

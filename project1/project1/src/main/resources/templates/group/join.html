@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>그룹 가입</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-color: white;
+        }
+        .form-container {
+            max-width: 700px;
+            margin: 100px auto;
+            padding: 20px;
+        }
+        .form-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2 class="form-title">그룹 가입</h2>
+    <form th:action="@{/groups/join}" th:object="${joinForm}" method="POST">
+        <div class="form-group">
+            <label class="form-label text-black">그룹 ID</label>
+            <input type="text" class="form-control" name="groupId">
+        </div>
+        <div class="form-group">
+            <label class="form-label text-black">멤버 ID</label>
+            <input type="password" class="form-control" name="memberId">
+        </div>
+
+        <button type="submit" class="btn btn-primary">그룹 가입</button>
+    </form>
+</div>
+
+</body>
+</html>
