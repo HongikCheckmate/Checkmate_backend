@@ -6,6 +6,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import project.project1.user.UserRepository;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/groups")
 public class GroupController {
@@ -22,6 +24,7 @@ public class GroupController {
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("groupForm", new GroupForm());
+
         // 방장 선택을 위해 모든 회원 목록을 전달 (테스트용)
         model.addAttribute("members", userRepository.findAll());
         return "group/create";
@@ -63,5 +66,13 @@ public class GroupController {
     public String showGroupList(Model model) {
         model.addAttribute("groups", groupService.findAllGroups());
         return "group/list";
+    }
+
+    // 그룹 검색
+    @GetMapping("/search")
+    public String searchGroups(@RequestParam("keyword") String keyword, Model model) {
+        List<Group> searchResults = groupService.searchGroupsByName(keyword);
+        model.addAttribute("groups", searchResults);
+        return "group/list";  // 그룹 리스트 템플릿 재사용
     }
 }

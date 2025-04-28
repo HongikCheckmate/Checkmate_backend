@@ -39,4 +39,9 @@ public class GroupService {
     public List<Group> findAllGroups() {
         return groupRepository.findAll();
     }
+
+    @Transactional(readOnly = true)
+    public List<Group> searchGroupsByName(String keyword){
+        return groupRepository.findByNameContaining(keyword);
+    }
 }
