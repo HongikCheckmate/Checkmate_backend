@@ -27,15 +27,17 @@ public class UserServiceTest {
         String email = "spring@naver.com";
         String password = "1234";
         String phone_number = "01012345678";
+        String nickname = "test";
 
         // when
-        SiteUser createdUser = userService.create(username, email, password, phone_number);
+        SiteUser createdUser = userService.create(username, nickname, email, password, phone_number);
 
         // then
         SiteUser foundUser = userRepository.findById(createdUser.getId()).orElse(null);
         assertThat(foundUser).isNotNull();
         assertThat(foundUser.getUsername()).isEqualTo(username);
         assertThat(foundUser.getEmail()).isEqualTo(email);
+        assertThat(foundUser.getNickname()).isEqualTo(nickname);
         assertThat(passwordEncoder.matches(password, foundUser.getPassword())).isTrue(); // 암호화되었는지 확인
         assertThat(foundUser.getPhone_number()).isEqualTo(phone_number);
     }

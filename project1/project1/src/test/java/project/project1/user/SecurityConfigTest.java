@@ -39,7 +39,7 @@ public class SecurityConfigTest {
     @BeforeEach
     public void BeforeEach() {
 
-        SiteUser user = userService.create("testuser", "test@naver.com",
+        SiteUser user = userService.create("testuser", "test", "test@naver.com",
                 "test1234", "01012345678");
         userRepository.save(user);
         System.out.println("ID = " + user.getUsername());
