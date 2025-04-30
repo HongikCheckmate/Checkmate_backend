@@ -66,8 +66,11 @@ public class GroupController {
     }
 
     @GetMapping("/list")
-    public String showGroupList(Model model) {
-        model.addAttribute("groups", groupService.findAllGroups());
+    public String showGroupList(Model model,
+                                @PageableDefault(size = 10) Pageable pageable) {
+        Page<Group> groupPage = groupService.searchGroupsByName("", pageable); // 전체 그룹 조회
+        model.addAttribute("groups", groupPage.getContent());
+        model.addAttribute("page", groupPage);
         return "group/list";
     }
 

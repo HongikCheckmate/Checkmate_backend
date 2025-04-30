@@ -43,7 +43,8 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Group> searchGroupsByName(String keyword, Pageable pageable){
+    public Page<Group> searchGroupsByName(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.isBlank()) keyword = "";
         return groupRepository.findByNameContaining(keyword, pageable);
     }
 }
