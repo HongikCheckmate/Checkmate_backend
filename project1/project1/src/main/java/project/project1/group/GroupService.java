@@ -39,4 +39,9 @@ public class GroupService {
     public List<Group> findAllGroups() {
         return groupRepository.findAll();
     }
+
+    public Group findById(Long groupId) {
+        return groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupId));
+    }
 }

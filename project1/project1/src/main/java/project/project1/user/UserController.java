@@ -30,13 +30,13 @@ public class UserController {
 
     @GetMapping("/signup")
     public String signup(SignUpForm signUpForm) {
-        return "signup_form";
+        return "user/signup_form";
     }
 
     @PostMapping("/signup")
     public String signup(@Valid SignUpForm signUpForm, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "signup_form";
+            return "user/signup_form";
         }
         userService.create(signUpForm.getUsername(), signUpForm.getNickname(),
                 signUpForm.getEmail(), signUpForm.getPassword(), signUpForm.getPhone_number());
@@ -45,7 +45,7 @@ public class UserController {
 
     @GetMapping("/login")
     public String login() {
-        return "login_form";
+        return "user/login_form";
     }
 
     @GetMapping("/mypage")
@@ -61,7 +61,7 @@ public class UserController {
         update.setEmail(user.getEmail());
 
         model.addAttribute("update", update);
-        return "myinfo_form";
+        return "user/myinfo_form";
     }
 
     @PostMapping("/mypage")
