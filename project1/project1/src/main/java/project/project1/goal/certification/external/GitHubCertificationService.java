@@ -1,12 +1,10 @@
-package project.project1.goal.external;
+package project.project1.goal.certification.external;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Service
 public class GitHubCertificationService implements ExternalCertificationService{

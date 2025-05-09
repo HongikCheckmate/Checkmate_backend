@@ -1,5 +1,6 @@
 package project.project1.goal;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,7 @@ public class GoalServiceImpl implements GoalService {
         this.goalRepository = goalRepository;
     }
 
+    @Transactional
     @Override
     public Goal createGoal(Goal goal) {
         return goalRepository.save(goal);

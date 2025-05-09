@@ -1,4 +1,4 @@
-package project.project1.goal.external;
+package project.project1.goal.certification.external;
 
 public interface ExternalCertificationService {
     boolean verifyCertification(String accountName);

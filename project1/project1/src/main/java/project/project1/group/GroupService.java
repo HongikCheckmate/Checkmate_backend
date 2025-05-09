@@ -42,6 +42,11 @@ public class GroupService {
         return groupRepository.findAll();
     }
 
+    public Group findById(Long groupId) {
+        return groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupId));
+    }
+
     @Transactional(readOnly = true)
     public Page<Group> searchGroupsByName(String keyword, Pageable pageable) {
         if (keyword == null || keyword.isBlank()) keyword = "";

@@ -26,4 +26,7 @@ public class SiteUser {
 
     @Column(unique = true)
     private String phone_number;
+
+    @Enumerated(value = EnumType.STRING)
+    private UserRole role;
 }

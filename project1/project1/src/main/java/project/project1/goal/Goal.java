@@ -17,9 +17,9 @@ public class Goal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private String cycle;
-    private LocalDate endDate;
+    private String name; //목표이름
+    private String cycle; //주기
+    private LocalDate endDate; //끝나는 날짜
 
     @Enumerated(EnumType.STRING)
     private CertificationType certificationType; //인증방식
@@ -28,5 +28,5 @@ public class Goal {
     @JoinColumn(name = "group_id")
     private Group group;
 
-    private Long managerId;
+    private Long managerId; //방장아이디
 }

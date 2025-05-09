@@ -3,7 +3,7 @@ package project.project1.goal.certification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import project.project1.goal.external.ExternalCertificationService;
+import project.project1.goal.certification.external.ExternalCertificationService;
 
 @RestController
 @RequestMapping("/certifications")
@@ -28,6 +28,14 @@ public class CertificationController {
                                             @RequestParam("userId") Long userId,
                                             @RequestParam("goalId") Long goalId) {
         certificationService.saveImageCertification(file, userId, goalId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/video")
+    public ResponseEntity<Void> uploadVideo(@RequestParam("file") MultipartFile file,
+                                            @RequestParam("userId") Long userId,
+                                            @RequestParam("goalId") Long goalId) {
+        certificationService.saveVideoCertification(file, userId, goalId);
         return ResponseEntity.ok().build();
     }
 
