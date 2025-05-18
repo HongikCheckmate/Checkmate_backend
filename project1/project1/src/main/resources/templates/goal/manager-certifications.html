@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>인증 관리 페이지</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4">인증 관리 페이지</h2>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">그룹명: <span th:text="${group.name}"></span></h5>
+            <p class="card-text">그룹 ID: <span th:text="${group.id}"></span></p>
+            <p class="card-text">목표 이름: <span th:text="${goal.name}"></span></p>
+            <p class="card-text">마감 날짜: <span th:text="${goal.endDate}"></span></p>
+        </div>
+    </div>
+
+    <div th:each="entry : ${certifications}" class="card mb-3">
+        <div class="border p-3">
+            <h4 class="mb-3" th:text="'제 ' + ${entry.key} + '주기 인증 목록'"></h4>
+            <div th:each="certification : ${entry.value}" class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">팀원: <span th:text="${certification.user.username}"></span></h5>
+                    <p class="card-text">인증일: <span th:text="${#temporals.format(certification.createdDate, 'yyyy-MM-dd')}"></span></p>
+
+                    <div th:switch="${certification.type}">
+                        <div th:case="'TEXT'">
+                            <p th:text="${certification.textContent}"></p>
+                        </div>
+                        <div th:case="'IMAGE'">
+                            <img th:src="@{'C:/Users/Public/degree_project/certification/' + ${certification.fileName}}" class="img-fluid" alt="인증 이미지">
+                        </div>
+                        <div th:case="'VIDEO'">
+                            <video controls class="w-100">
+                                <source th:src="@{'C:/Users/Public/degree_project/certification/' + ${certification.fileName}}" type="video/mp4">
+                                브라우저가 video 태그를 지원하지 않습니다.
+                            </video>
+                        </div>
+                        <div th:case="*">
+                            <p>지원되지 않는 인증 형식입니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Service("localFileStorage")
@@ -20,17 +22,31 @@ public class LocalFileStorageService implements FileStorageService {
     private String uploadDir;
 
     @Override
-    public String saveFile(MultipartFile file, CertificationType type) {
+    public String saveFile(MultipartFile file, CertificationType type, Long groupId, Long goalId, Long userId) {
         try {
-            String folder = uploadDir + "/" + type.name().toLowerCase();
-            File dir = new File(folder);
+            // 날짜 기반 디렉토리 (주기 단위 구분 가능)
+            String datePath = LocalDate.now().format(DateTimeFormatter.ISO_DATE); // ex. 2025-05-14
+
+            // 디렉토리 경로 구성
+            String folderPath = String.format("%s/group_%d/goal_%d/%s/user_%d",
+                    uploadDir, groupId, goalId, datePath, userId);
+
+            File dir = new File(folderPath);
             if (!dir.exists()) {
-                dir.mkdirs();
+                dir.mkdirs(); // 디렉토리 없으면 생성
             }
 
-            String filePath = folder + "/" + file.getOriginalFilename();
-            file.transferTo(new File(filePath));
-            return filePath;
+            // 파일 이름 구성 (UUID로 충돌 방지)
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".")) : "";
+            String savedFileName = UUID.randomUUID() + extension;
+
+            // 전체 파일 경로
+            File dest = new File(dir, savedFileName);
+            file.transferTo(dest);
+
+            // 저장된 경로 리턴 (절대 경로 또는 상대 경로 중 선택)
+            return dest.getAbsolutePath();
         } catch (IOException e) {
             throw new RuntimeException("파일 저장 실패", e);
         }
