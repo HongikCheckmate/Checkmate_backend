@@ -21,6 +21,7 @@ public class CustomUserDetails implements UserDetails {
     private final String phone_number;
     private final UserRole role;
 
+
     public CustomUserDetails(SiteUser siteUser) {
         this.id = siteUser.getId();
         this.username = siteUser.getUsername();

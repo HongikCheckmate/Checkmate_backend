@@ -61,7 +61,7 @@
     <input type="text" id="name" th:field="*{name}" required>
 
     <label for="cycle">목표 수행 주기</label>
-    <input type="text" id="cycle" th:field="*{cycle}" placeholder="예: 매일, 주 3회" required>
+    <input type="number" id="cycle" name="cycle" min="1" required />
 
     <label for="endDate">종료 시기</label>
     <input type="date" id="endDate" th:field="*{endDate}" required>

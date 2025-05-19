@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import project.project1.group.Group;
 
 @RequiredArgsConstructor
 @Service
@@ -21,5 +22,10 @@ public class UserService {
         user.setRole(UserRole.USER);
         this.userRepository.save(user);
         return user;
+    }
+
+    public SiteUser findById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
     }
 }

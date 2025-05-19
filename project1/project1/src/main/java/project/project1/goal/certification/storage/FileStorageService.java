@@ -4,5 +4,5 @@ import org.springframework.web.multipart.MultipartFile;
 import project.project1.goal.certification.CertificationType;
 
 public interface FileStorageService {
-    String saveFile(MultipartFile file, CertificationType type);
+    String saveFile(MultipartFile file, CertificationType type, Long groupId, Long goalId, Long userId);
 }

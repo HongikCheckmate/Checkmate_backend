@@ -53,7 +53,7 @@ public class GoalController {
 
     }
 
-    //목표 저장(로그인 사용자 정보 포함)
+    //목표 저장
     @PostMapping("/submit")
     public String createGoal(@ModelAttribute Goal goal,
                              @AuthenticationPrincipal CustomUserDetails userDetails,

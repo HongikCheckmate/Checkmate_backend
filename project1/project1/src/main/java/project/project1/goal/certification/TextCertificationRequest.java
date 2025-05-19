@@ -8,6 +8,5 @@ import lombok.Setter;
 public class TextCertificationRequest {
     private Long userId;
     private Long goalId;
-    private String content; // 사용자가 입력한 텍스트 인증 내용
-
+    private String content;// 사용자가 입력한 텍스트 인증 내용
 }
