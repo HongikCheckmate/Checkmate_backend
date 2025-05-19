@@ -24,7 +24,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/h2-console/**", "/user/login", "/user/signup", "/css/**", "/js/**").permitAll() //비회원 허용 경로
+                .requestMatchers("/api/**","/swagger-ui/**", "/v3/**", "/h2-console/**", "/user/login", "/user/signup", "/css/**", "/js/**").permitAll() //비회원 허용 경로
                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
                 .requestMatchers("/user/**", "/goals/**").hasAuthority("USER")
                 .anyRequest().authenticated())
