@@ -45,8 +45,8 @@ public class LocalFileStorageService implements FileStorageService {
             File dest = new File(dir, savedFileName);
             file.transferTo(dest);
 
-            // 저장된 경로 리턴 (절대 경로 또는 상대 경로 중 선택)
-            return dest.getAbsolutePath();
+            //상대 경로 반환
+            return String.format("group_%d/goal_%d/%s/user_%d/%s", groupId, goalId, datePath, userId, savedFileName);
         } catch (IOException e) {
             throw new RuntimeException("파일 저장 실패", e);
         }

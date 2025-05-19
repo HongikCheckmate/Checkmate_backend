@@ -20,22 +20,23 @@
 
     <div th:each="entry : ${certifications}" class="card mb-3">
         <div class="border p-3">
-            <h4 class="mb-3" th:text="'제 ' + ${entry.key} + '주기 인증 목록'"></h4>
+            <h4 class="mb-3" th:text=" ${entry.key} + '주기 인증 목록'"></h4>
             <div th:each="certification : ${entry.value}" class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title">팀원: <span th:text="${certification.user.username}"></span></h5>
                     <p class="card-text">인증일: <span th:text="${#temporals.format(certification.createdDate, 'yyyy-MM-dd')}"></span></p>
 
-                    <div th:switch="${certification.type}">
+                    <div th:switch="${certification.type.name()}">
                         <div th:case="'TEXT'">
-                            <p th:text="${certification.textContent}"></p>
+                            <p th:text="${certification.content}"></p>
                         </div>
                         <div th:case="'IMAGE'">
-                            <img th:src="@{'C:/Users/Public/degree_project/certification/' + ${certification.fileName}}" class="img-fluid" alt="인증 이미지">
+                            <img th:src="@{'/certification/group_' + ${group.id} + '/goal_' + ${goal.id} + '/' + ${#temporals.format(certification.certifiedAt, 'yyyy-MM-dd')} + '/user_' + ${certification.user.id} + '/' + ${#strings.substring(certification.contentUrl, certification.contentUrl.lastIndexOf('/') + 1)}}"
+                                 class="img-fluid" alt="인증 이미지">
                         </div>
                         <div th:case="'VIDEO'">
                             <video controls class="w-100">
-                                <source th:src="@{'C:/Users/Public/degree_project/certification/' + ${certification.fileName}}" type="video/mp4">
+                                <source th:src="@{'/certification/group_' + ${group.id} + '/goal_' + ${goal.id} + '/' + ${#temporals.format(certification.certifiedAt, 'yyyy-MM-dd')} + '/user_' + ${certification.user.id} + '/' + ${#strings.substring(certification.contentUrl, certification.contentUrl.lastIndexOf('/') + 1)}}" type="video/mp4">
                                 브라우저가 video 태그를 지원하지 않습니다.
                             </video>
                         </div>
