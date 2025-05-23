@@ -52,6 +52,6 @@ public class ManagerController {
         model.addAttribute("goal", goal);
         model.addAttribute("certifications", certifications);
 
-        return "goal/manager-certifications"; // 앞서 만든 HTML
+        return "goal/manager-certifications";
     }
 }
