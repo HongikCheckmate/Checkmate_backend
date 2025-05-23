@@ -19,7 +19,7 @@
     <div class="container-fluid row justify-content-center align-content-center">
         <div class="card bg-dark" style="border-radius: 1rem; width: 600px; height: 800px; padding:2rem;">
             <div class="card-body p-5 text-center">
-                <h2 class="text-white">시작하기</h2>
+                <h2 class="text-white">그룹 만들기</h2>
 
                 <div class="mb-2">
 
@@ -37,15 +37,15 @@
                             <label class="form-label text-white">비밀번호</label>
                             <input type="password" class="form-control" name="password">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label text-white" for="managerId">방장 선택:</label>
-                            <select th:field="*{managerId}" class="form-control" id="managerId" required>
-                                <option value="" disabled selected>선택해주세요</option>
-                                <option th:each="member : ${members}"
-                                        th:value="${member.id}"
-                                        th:text="${member.username}"></option>
-                            </select>
-                        </div>
+<!--                        <div class="mb-3">-->
+<!--                            <label class="form-label text-white" for="managerId">방장 선택:</label>-->
+<!--                            <select th:field="*{managerId}" class="form-control" id="managerId" required>-->
+<!--                                <option value="" disabled selected>선택해주세요</option>-->
+<!--                                <option th:each="member : ${members}"-->
+<!--                                        th:value="${member.id}"-->
+<!--                                        th:text="${member.username}"></option>-->
+<!--                            </select>-->
+<!--                        </div>-->
 
                         <button type="submit">그룹 생성</button>
                     </form>

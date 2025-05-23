@@ -9,5 +9,4 @@ public class GroupForm {
     private String name;
     private String description;
     private String password;
-    private Long managerId;
 }

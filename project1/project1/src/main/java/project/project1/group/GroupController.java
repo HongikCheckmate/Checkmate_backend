@@ -3,6 +3,8 @@ package project.project1.group;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -35,7 +37,7 @@ public class GroupController {
 
     // 그룹 생성 처리
     @PostMapping("/create")
-    public String createGroup(@ModelAttribute("groupForm") GroupForm groupForm, BindingResult result) {
+    public String createGroup(@AuthenticationPrincipal UserDetails userDetails, @ModelAttribute("groupForm") GroupForm groupForm, BindingResult result) {
         if (result.hasErrors()) {
             return "group/create";
         }
@@ -43,7 +45,7 @@ public class GroupController {
                 groupForm.getName(),
                 groupForm.getDescription(),
                 groupForm.getPassword(),
-                groupForm.getManagerId()
+                userRepository.findByUsername(userDetails.getUsername()).get().getId()
         );
         return "redirect:/groups/list"; // 이후 그룹 목록 페이지로 리디렉션 (추가 개발 필요)
     }
