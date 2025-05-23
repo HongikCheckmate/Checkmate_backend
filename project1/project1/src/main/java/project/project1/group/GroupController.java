@@ -5,10 +5,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import project.project1.user.SiteUser;
 import project.project1.user.UserRepository;
 
 import java.util.List;
@@ -57,13 +59,22 @@ public class GroupController {
         return "group/join";
     }
 
-    // 그룹 가입 처리
     @PostMapping("/join")
-    public String joinGroup(@ModelAttribute("joinForm") GroupJoinForm joinForm, BindingResult result) {
+    public String joinGroup(@ModelAttribute("joinForm") GroupJoinForm joinForm,
+                            BindingResult result,
+                            @AuthenticationPrincipal UserDetails userDetails) {
         if (result.hasErrors()) {
             return "group/join";
         }
-        groupService.joinGroup(joinForm.getGroupId(), joinForm.getMemberId());
+
+        // 현재 로그인한 사용자의 ID를 조회
+        String username = userDetails.getUsername();
+        SiteUser user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found: " + username));
+
+        // memberId는 로그인한 사용자 ID로 자동 설정
+        groupService.joinGroup(joinForm.getGroupId(), user.getId());
+
         return "redirect:/groups/list";
     }
 
