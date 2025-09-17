@@ -23,10 +23,11 @@ public class UserSecurityService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         SiteUser user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found: " + username));
-        return new CustomUserDetails(user);
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .roles(user.getRole().name())
+                .build();
     }
-
-        List<GrantedAuthority> authorities = new ArrayList<>();
-
 }
 
