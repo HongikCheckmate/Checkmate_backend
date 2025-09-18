@@ -9,6 +9,14 @@
         body {
           background-color: white;
         }
+        .social-btn {
+          width: 100%;
+          margin-bottom: 10px;
+          color: #fff;
+          font-weight: bold;
+        }
+        .btn-google { background-color: blue; }
+        .btn-github { background-color: grey; }
     </style>
 </head>
 <body>
@@ -32,6 +40,11 @@
                     </form>
 
                     <button type="button" class="btn btn-secondary mt-3" onclick="location.href='/user/signup'">회원가입</button>
+                    <hr class="bg-light my-4">
+
+                    <!-- 소셜 로그인 버튼들 -->
+                    <a class="btn social-btn btn-google" href="/oauth2/authorization/google">구글로 로그인</a>
+                    <a class="btn social-btn btn-github" href="/oauth2/authorization/github">깃허브로 로그인</a>
                 </div>
             </div>
         </div>

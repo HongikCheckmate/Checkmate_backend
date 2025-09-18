@@ -1,4 +1,4 @@
-package project.project1.user.social;
+package project.project1.user.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import project.project1.user.SiteUser;
-import project.project1.user.UserRepository;
 
 
 import java.util.Date;
@@ -37,12 +35,12 @@ public class JwtService {
     private String refreshHeader;
 
     /**
-     * JWT의 Subject와 Claim으로 email 사용 -> 클레임의 name을 "email"으로 설정
+     * JWT의 Subject와 Claim으로 username 사용 -> 클레임의 name을 "username"으로 설정
      * JWT의 헤더에 들어오는 값 : 'Authorization(Key) = Bearer {토큰} (Value)' 형식
      */
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
-    private static final String EMAIL_CLAIM = "email";
+    private static final String USERNAME_CLAIM = "username";
     private static final String BEARER = "Bearer ";
 
     private final project.project1.user.UserRepository userRepository;
@@ -50,16 +48,14 @@ public class JwtService {
     /**
      * AccessToken 생성 메소드
      */
-    public String createAccessToken(String email) {
+    public String createAccessToken(String username) {
         Date now = new Date();
         return JWT.create() // JWT 토큰을 생성하는 빌더 반환
                 .withSubject(ACCESS_TOKEN_SUBJECT) // JWT의 Subject 지정 -> AccessToken이므로 AccessToken
                 .withExpiresAt(new Date(now.getTime() + accessTokenExpirationPeriod)) // 토큰 만료 시간 설정
 
-                //클레임으로는 저희는 email 하나만 사용합니다.
-                //추가적으로 식별자나, 이름 등의 정보를 더 추가하셔도 됩니다.
-                //추가하실 경우 .withClaim(클래임 이름, 클래임 값) 으로 설정해주시면 됩니다
-                .withClaim(EMAIL_CLAIM, email)
+                //클레임으로는 저희는 username 하나만 사용 추가시 .withClaim(클래임 이름, 클래임 값) 으로 설정해주시면 됩니다
+                .withClaim(USERNAME_CLAIM, username)
                 .sign(Algorithm.HMAC512(secretkey)); // HMAC512 알고리즘 사용, application-jwt.yml에서 지정한 secret 키로 암호화
     }
 
@@ -125,13 +121,13 @@ public class JwtService {
      * 유효하다면 getClaim()으로 이메일 추출
      * 유효하지 않다면 빈 Optional 객체 반환
      */
-    public Optional<String> extractEmail(String accessToken) {
+    public Optional<String> extractUsername(String accessToken) {
         try {
             // 토큰 유효성 검사하는 데에 사용할 알고리즘이 있는 JWT verifier builder 반환
             return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secretkey))
                     .build() // 반환된 빌더로 JWT verifier 생성
                     .verify(accessToken) // accessToken을 검증하고 유효하지 않다면 예외 발생
-                    .getClaim(EMAIL_CLAIM) // claim(Emial) 가져오기
+                    .getClaim(USERNAME_CLAIM) // claim(username) 가져오기
                     .asString());
         } catch (Exception e) {
             log.error("액세스 토큰이 유효하지 않습니다.");
@@ -156,8 +152,8 @@ public class JwtService {
     /**
      * RefreshToken DB 저장(업데이트)
      */
-    public void updateRefreshToken(String email, String refreshToken) {
-        userRepository.findByEmail(email)
+    public void updateRefreshToken(String username, String refreshToken) {
+        userRepository.findByUsername(username)
                 .ifPresentOrElse(
                         user -> user.updateRefreshToken(refreshToken),
                         () -> new Exception("User Not Found")

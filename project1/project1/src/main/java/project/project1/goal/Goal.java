@@ -22,8 +22,10 @@ public class Goal {
     private Long id;
 
     private String name; //목표이름
+
     @Column(nullable = false)
     private int cycle; //주기
+
     private LocalDate endDate; //끝나는 날짜
 
     @Enumerated(EnumType.STRING)

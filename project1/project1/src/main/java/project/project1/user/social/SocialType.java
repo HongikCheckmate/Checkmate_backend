@@ -1,6 +1,6 @@
-package project.project1.user.external;
+package project.project1.user.social;
 
-public enum ExternalType {
+public enum SocialType {
     GOOGLE,
     GITHUB
 }

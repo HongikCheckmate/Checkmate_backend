@@ -51,7 +51,9 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        System.out.println("DEBUG ROLE: " + this.role);           // Enum name
+        System.out.println("DEBUG ROLE VALUE: " + this.role.getKey()); // Enum value
+        return List.of(new SimpleGrantedAuthority(this.role.getKey()));
     }
 
     public Long getId() {

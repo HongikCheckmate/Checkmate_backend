@@ -1,5 +1,6 @@
 package project.project1.user;
 
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.User;
@@ -29,17 +30,14 @@ public class UserController {
     private final UserRepository userRepository;
 
     @GetMapping("/signup")
-    public String signup(SignUpForm signUpForm) {
+    public String signupForm(SignUpForm signUpForm) {
         return "user/signup_form";
     }
 
     @PostMapping("/signup")
-    public String signup(@Valid SignUpForm signUpForm, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "user/signup_form";
-        }
-        userService.create(signUpForm.getUsername(), signUpForm.getNickname(),
-                signUpForm.getEmail(), signUpForm.getPassword(), signUpForm.getPhone_number());
+    public String signup(@RequestBody SignUpForm signUpForm) throws Exception{
+
+        userService.create(signUpForm);
         return "redirect:/user/login";
     }
 
