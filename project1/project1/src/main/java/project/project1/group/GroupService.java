@@ -23,7 +23,11 @@ public class GroupService {
     public Group createGroup(String name, String description, String password, Long leaderId) {
         SiteUser leader = userRepository.findById(leaderId)
                 .orElseThrow(() -> new NoSuchElementException("리더 회원이 존재하지 않습니다. ID=" + leaderId));
-        Group group = new Group(name, description, password, leader);
+        Group group = Group.builder()
+                .name(name)
+                .password(password)
+                .leader(leader)
+                .build();
         return groupRepository.save(group);
     }
 
