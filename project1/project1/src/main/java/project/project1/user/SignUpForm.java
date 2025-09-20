@@ -16,6 +16,9 @@ public class SignUpForm {
     @NotEmpty(message = "비밀번호를 입력하세요.")
     private String password;
 
+    @NotEmpty(message = "비밀번호를 한 번 더 입력하세요.")
+    private String check_password;
+
     @NotEmpty(message = "닉네임 입력하세요.")
     private String nickname;
 

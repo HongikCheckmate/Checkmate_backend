@@ -70,7 +70,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests((auth) -> auth
 //                .requestMatchers("/api/**","/swagger-ui/**", "/v3/**", "/h2-console/**", "/user/**", "/css/**", "/js/**").permitAll() //비회원 허용 경로
-                                .requestMatchers("/api/oauth2/sign-up").authenticated()
+                                .requestMatchers("/api/oauth2/sign-up").hasRole("GUEST")
                                 .anyRequest().permitAll() //모든 접속 허용
 //                                .anyRequest().authenticated()
                 )

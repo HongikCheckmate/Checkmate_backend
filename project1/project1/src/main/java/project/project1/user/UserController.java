@@ -35,7 +35,11 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public String signup(@RequestBody SignUpForm signUpForm) throws Exception{
+    public String signup(@RequestBody SignUpForm signUpForm, BindingResult bindingResult) throws Exception{
+        if (!signUpForm.getCheck_password().equals(signUpForm.getPassword())) {
+            bindingResult.rejectValue("check_password", "PasswordInCorrect", "비밀번호가 일치하지 않습니다.");
+            return "user/signup_form";
+        }
 
         userService.create(signUpForm);
         return "redirect:/user/login";
