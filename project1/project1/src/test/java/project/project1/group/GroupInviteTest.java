@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import project.project1.group.invite.dto.*;
 import project.project1.user.SiteUser;
@@ -19,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 class GroupInviteTest {
 
     @Autowired
@@ -44,7 +46,7 @@ class GroupInviteTest {
 
         SiteUser a = userRepository.save(SiteUser.builder().username("A유저").build());
         SiteUser b = userRepository.save(SiteUser.builder().username("B유저").build());
-        Group g = groupRepository.save(Group.builder().name("테스트 그룹").build());
+        Group g = groupRepository.save(Group.builder().leader(a).name("테스트 그룹").build());
 
         inviterId = a.getId();
         inviteeId = b.getId();
