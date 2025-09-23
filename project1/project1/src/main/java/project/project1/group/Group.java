@@ -11,6 +11,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Table(name = "groups")
 public class Group {
 
     @Getter
