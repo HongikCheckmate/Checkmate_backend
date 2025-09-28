@@ -28,6 +28,6 @@ public class GroupInvite {
     private Group group;
 
     @Enumerated(EnumType.STRING)
-    private InviteStatus status = InviteStatus.PENDING;
+    private InviteStatus status;
 
 }
