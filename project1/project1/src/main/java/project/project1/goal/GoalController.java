@@ -39,7 +39,7 @@ public class GoalController {
         Group group = groupService.findById(groupId);
 
         boolean isMember = group.getMember().stream().anyMatch(member -> member.getId().equals(currentUserId));
-        boolean isManager = group.getManager().getId().equals(currentUserId);
+        boolean isManager = group.getLeader().getId().equals(currentUserId);
         if (!isMember || !isManager) {
             throw new AccessDeniedException("접근 권한이 없습니다.");
         }
