@@ -9,6 +9,7 @@ import project.project1.user.UserRepository;
 import project.project1.user.UserRole;
 import project.project1.user.jwt.JwtService;
 
+import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -32,7 +33,7 @@ public class OAuthSignUpController {
         }
 
         // JWT 발급
-        String accessToken = jwtService.createAccessToken(user.getUsername());
+        String accessToken = jwtService.createAccessToken(user.getId(), user.getUsername());
         String refreshToken = jwtService.createRefreshToken();
         jwtService.updateRefreshToken(user.getUsername(), refreshToken);
 
@@ -44,8 +45,10 @@ public class OAuthSignUpController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<?> signUp(@RequestBody SignUpRequest request) {
-        SiteUser user = userRepository.findByUsername(request.getUsername())
+    public ResponseEntity<?> signUp(@RequestBody SignUpRequest request, Principal principal) {
+
+        String authenticatedUsername = principal.getName();
+        SiteUser user = userRepository.findByUsername(authenticatedUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // 추가 정보 업데이트
@@ -56,9 +59,9 @@ public class OAuthSignUpController {
         userRepository.save(user);
 
         // JWT 재발급
-        String accessToken = jwtService.createAccessToken(user.getEmail());
+        String accessToken = jwtService.createAccessToken(user.getId(), user.getUsername());
         String refreshToken = jwtService.createRefreshToken();
-        jwtService.updateRefreshToken(user.getEmail(), refreshToken);
+        jwtService.updateRefreshToken(user.getUsername(), refreshToken);
 
         return ResponseEntity.ok(Map.of(
                 "accessToken", accessToken,

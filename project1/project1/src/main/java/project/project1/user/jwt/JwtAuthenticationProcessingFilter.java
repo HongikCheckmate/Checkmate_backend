@@ -77,7 +77,7 @@ protected void doFilterInternal(HttpServletRequest request, HttpServletResponse 
         userRepository.findByRefreshToken(refreshToken)
                 .ifPresent(user -> {
                     String reIssuedRefreshToken = reIssueRefreshToken(user);
-                    jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getUsername()),
+                    jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getId(), user.getUsername()),
                             reIssuedRefreshToken);
                 });
     }

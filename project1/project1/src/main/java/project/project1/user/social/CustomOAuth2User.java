@@ -11,14 +11,16 @@ import java.util.Map;
 
 @Getter
 public class CustomOAuth2User extends DefaultOAuth2User { // DefaultOAuth2User를 상속하고, username, email, role 필드 추가
+    private Long id;
     private String username;
     private String email;
     private UserRole role;
 
     public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities,
                             Map<String, Object> attributes, String nameAttributeKey,
-                            String email, String username, UserRole role) {
+                            Long id, String email, String username, UserRole role) {
         super(authorities, attributes, nameAttributeKey);
+        this.id = id;
         this.username = username;
         this.role = role;
         this.email = email;

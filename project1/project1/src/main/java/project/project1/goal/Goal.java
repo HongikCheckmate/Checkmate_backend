@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import project.project1.goal.certification.CertificationType;
+import project.project1.goal.certification.external.ProblemGoalType;
 import project.project1.group.Group;
 
 import java.time.LocalDate;
@@ -30,6 +31,12 @@ public class Goal {
 
     @Enumerated(EnumType.STRING)
     private CertificationType certificationType; //인증방식
+
+    private int problemId;       // "1000,2557" (SPECIFIC 모드일 때)
+    private Integer problemCount;    // COUNT 모드일 때
+
+    @Enumerated(EnumType.STRING)
+    private ProblemGoalType problemGoalType; // SPECIFIC or COUNT
 
     @ManyToOne
     @JoinColumn(name = "group_id")

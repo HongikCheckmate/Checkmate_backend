@@ -1,16 +1,16 @@
 package project.project1.goal.certification;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.userdetails.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import project.project1.goal.Goal;
-import project.project1.goal.GoalRepository;
 import project.project1.goal.GoalService;
+import project.project1.goal.certification.external.ExternalCertificationMethod;
+import project.project1.goal.certification.external.solvedac.CountProblemCertificationService;
+import project.project1.goal.certification.external.solvedac.SolvedAcCertificationService;
+import project.project1.goal.certification.external.solvedac.SpecificProblemCertificationService;
 import project.project1.goal.certification.storage.FileStorageService;
 import project.project1.user.SiteUser;
-import project.project1.user.UserRepository;
 import project.project1.user.UserService;
 
 import java.time.LocalDate;
@@ -22,24 +22,18 @@ import java.util.Map;
 import java.util.TreeMap;
 
 @Service
+@RequiredArgsConstructor
 public class CertificationService {
 
     private final FileStorageService fileStorageService;
     private final CertificationRepository certificationRepository;
     private final GoalService goalService;
     private final UserService userService;
+    private final SolvedAcCertificationService solvedAcService;
+    private final SpecificProblemCertificationService specificService;
+    private final CountProblemCertificationService countService;
 
-    public CertificationService(CertificationRepository cr,
-                                @Qualifier("localFileStorage") FileStorageService fs,
-                                GoalService gs,
-                                UserService us) {
-        this.certificationRepository = cr;
-        this.fileStorageService = fs;
-        this.goalService = gs;
-        this.userService = us;
-    }
-
-    public void saveTextCertification(TextCertificationRequest request, Long userId, Long goalId) {
+    public Certification saveTextCertification(TextCertificationRequest req, Long userId, Long goalId) {
         SiteUser user = userService.findById(userId);
         Goal goal = goalService.findById(goalId);
 
@@ -47,13 +41,13 @@ public class CertificationService {
         cert.setUser(user);
         cert.setGoal(goal);
         cert.setType(CertificationType.TEXT);
-        cert.setContent(request.getContent());
+        cert.setContent(req.getContent());
         cert.setCertifiedAt(LocalDateTime.now());
 
-        certificationRepository.save(cert);
+        return certificationRepository.save(cert);
     }
 
-    public void saveImageCertification(MultipartFile file, Long userId, Long goalId, Long groupId) {
+    public Certification saveImageCertification(MultipartFile file, Long userId, Long goalId, Long groupId) {
         SiteUser user = userService.findById(userId);
         Goal goal = goalService.findById(goalId);
         // 이미지 파일 저장 로직 (예: S3, 로컬 경로 등)
@@ -65,10 +59,10 @@ public class CertificationService {
         cert.setContentUrl(imageUrl);
         cert.setCertifiedAt(LocalDateTime.now());
 
-        certificationRepository.save(cert);
+        return certificationRepository.save(cert);
     }
 
-    public void saveVideoCertification(MultipartFile file, Long userId, Long goalId, Long groupId) {
+    public Certification saveVideoCertification(MultipartFile file, Long userId, Long goalId, Long groupId) {
         SiteUser user = userService.findById(userId);
         Goal goal = goalService.findById(goalId);
         // 동영상 저장 로직
@@ -80,12 +74,33 @@ public class CertificationService {
         cert.setContentUrl(videoUrl);
         cert.setCertifiedAt(LocalDateTime.now());
 
-        certificationRepository.save(cert);
+        return certificationRepository.save(cert);
     }
 
-    private String saveFile(MultipartFile file) {
-        // 실제 파일 저장 로직
-        return "https://example.com/fake-path/" + file.getOriginalFilename();
+    public Certification certifyExternal(Long userId, Long goalId, String handle, ExternalCertificationMethod method) {
+        SiteUser user = userService.findById(userId);
+        Goal goal = goalService.findById(goalId);
+
+        boolean success = switch (method) {
+            case SOLVED_AC -> switch (goal.getProblemGoalType()) {
+                case SPECIFIC -> specificService.verify(handle, goal.getProblemId());
+                case COUNT    -> countService.verify(handle, goal.getProblemCount());
+            };
+ //           case GITHUB -> githubService.verify(handle, goal); // 추후 구현
+        };
+
+        if (!success) {
+            throw new IllegalStateException("인증 조건을 충족하지 못했습니다.");
+        }
+
+        Certification cert = new Certification();
+        cert.setUser(user);
+        cert.setGoal(goal);
+        cert.setType(CertificationType.EXTERNAL);
+        cert.setMethod(method);
+        cert.setCertifiedAt(LocalDateTime.now());
+
+        return certificationRepository.save(cert);
     }
 
 
@@ -106,5 +121,10 @@ public class CertificationService {
         }
 
         return cycleMap;
+    }
+
+
+    public List<Certification> getUserCertifications(Long goalId, Long userId) {
+        return certificationRepository.findByGoalIdAndUserId(goalId, userId);
     }
 }

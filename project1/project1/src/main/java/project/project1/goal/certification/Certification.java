@@ -7,6 +7,7 @@ import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import project.project1.goal.Goal;
+import project.project1.goal.certification.external.ExternalCertificationMethod;
 import project.project1.group.Group;
 import project.project1.user.SiteUser;
 
@@ -31,7 +32,8 @@ public class Certification {
     @Enumerated(EnumType.STRING)
     private CertificationType type; // TEXT, IMAGE, VIDEO, EXTERNAL
 
-    private String method; // 예: "GITHUB", "UPLOAD", "NOTION"
+    @Enumerated(EnumType.STRING)
+    private ExternalCertificationMethod method; // SOLVED_AC, GITHUB
 
     private LocalDateTime certifiedAt;
 

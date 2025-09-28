@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class SolvedAcService {
+public class SolvedAcCertificationService {
     private final WebClient webClient = WebClient.create("https://solved.ac/api/v3");
 
     public List<SolvedSubmission> getRecentSubmissions(String handle, int size) {

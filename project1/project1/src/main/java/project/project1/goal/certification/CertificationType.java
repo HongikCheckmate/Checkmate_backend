@@ -4,5 +4,5 @@ public enum CertificationType { //인증방식
     TEXT,
     IMAGE,
     VIDEO,
-    EXTERNAL_LINK
+    EXTERNAL
 }

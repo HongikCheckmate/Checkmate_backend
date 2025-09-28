@@ -1,4 +1,4 @@
-package project.project1.goal.certification.external;
+package project.project1.goal.certification.external.solvedac;
 
 import lombok.Getter;
 import lombok.Setter;

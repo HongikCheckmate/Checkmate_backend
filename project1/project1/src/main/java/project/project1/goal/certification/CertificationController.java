@@ -1,5 +1,6 @@
 package project.project1.goal.certification;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -7,37 +8,31 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import project.project1.goal.Goal;
+import project.project1.goal.GoalRepository;
 import project.project1.goal.GoalServiceImpl;
-import project.project1.goal.certification.external.ExternalCertificationService;
+import project.project1.goal.certification.external.ExternalCertificationRequest;
 import project.project1.group.Group;
 import project.project1.group.GroupService;
 import project.project1.user.CustomUserDetails;
 import project.project1.user.SiteUser;
+import project.project1.user.UserRepository;
 import project.project1.user.UserService;
 
 import java.nio.file.AccessDeniedException;
+import java.security.Principal;
+import java.util.List;
 
 @Controller
-@RequestMapping("/certifications")
+@RequestMapping("/api/certifications")
+@RequiredArgsConstructor
 public class CertificationController {
 
     private final CertificationService certificationService;
-    private final ExternalCertificationService githubService;
     private final GoalServiceImpl goalService;
     private final GroupService groupService;
     private final UserService userService;
-
-    public CertificationController(CertificationService certificationService,
-                                   ExternalCertificationService githubService,
-                                   GoalServiceImpl goalService,
-                                   GroupService groupService,
-                                   UserService userService) {
-        this.certificationService = certificationService;
-        this.githubService = githubService;
-        this.goalService = goalService;
-        this.groupService = groupService;
-        this.userService = userService;
-    }
+    private final UserRepository userRepository;
+    private final GoalRepository goalRepository;
 
     @GetMapping("/{groupId}/certification-info/{goalId}")
     public String certificationForm(@PathVariable("goalId") Long goalId,
@@ -69,34 +64,57 @@ public class CertificationController {
     }
 
     @PostMapping("/text")
-    public ResponseEntity<Void> uploadText(@ModelAttribute TextCertificationRequest req,
-                                           @RequestParam("goalId") Long goalId,
-                                           @AuthenticationPrincipal(expression = "id") Long userId) {
-        certificationService.saveTextCertification(req, userId, goalId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Certification> uploadText(
+            @RequestBody TextCertificationRequest req,
+            @RequestParam("goalId") Long goalId,
+            @AuthenticationPrincipal(expression = "id") Long userId
+    ) {
+        Certification cert = certificationService.saveTextCertification(req, userId, goalId);
+        return ResponseEntity.ok(cert);
     }
 
     @PostMapping("/image")
-    public ResponseEntity<Void> uploadImage(@RequestParam("file") MultipartFile file,
-                                            @AuthenticationPrincipal(expression = "id") Long userId,
-                                            @RequestParam("goalId") Long goalId,
-                                            @RequestParam("groupId") Long groupId) {
-        certificationService.saveImageCertification(file, userId, goalId, groupId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Certification> uploadImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("goalId") Long goalId,
+            @RequestParam("groupId") Long groupId,
+            @AuthenticationPrincipal(expression = "id") Long userId
+    ) {
+        Certification cert = certificationService.saveImageCertification(file, userId, goalId, groupId);
+        return ResponseEntity.ok(cert);
     }
 
     @PostMapping("/video")
-    public ResponseEntity<Void> uploadVideo(@RequestParam("file") MultipartFile file,
-                                            @AuthenticationPrincipal(expression = "id") Long userId,
-                                            @RequestParam("goalId") Long goalId,
-                                            @RequestParam("groupId") Long groupId) {
-        certificationService.saveVideoCertification(file, userId, goalId, groupId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Certification> uploadVideo(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("goalId") Long goalId,
+            @RequestParam("groupId") Long groupId,
+            @AuthenticationPrincipal(expression = "id") Long userId
+    ) {
+        Certification cert = certificationService.saveVideoCertification(file, userId, goalId, groupId);
+        return ResponseEntity.ok(cert);
     }
 
-    @GetMapping("/github/{username}")
-    public ResponseEntity<Boolean> verifyGithub(@PathVariable String username) {
-        boolean result = githubService.verifyCertification(username);
-        return ResponseEntity.ok(result);
+    @PostMapping("/external")
+    public ResponseEntity<Certification> certifyExternal(
+            @RequestBody ExternalCertificationRequest req,
+            @AuthenticationPrincipal SiteUser user
+            ) {
+        Long userId = user.getId();
+        Certification cert = certificationService.certifyExternal(userId, req.getGoalId(), req.getHandle(), req.getMethod());
+        return ResponseEntity.ok(cert);
     }
+
+    /**
+     * 특정 목표에 대한 유저의 인증 내역 조회
+     */
+    @GetMapping("/{goalId}/user/{userId}")
+    public ResponseEntity<List<Certification>> getUserCertifications(
+            @PathVariable Long goalId,
+            @PathVariable Long userId
+    ) {
+        List<Certification> certs = certificationService.getUserCertifications(goalId, userId);
+        return ResponseEntity.ok(certs);
+    }
+
 }

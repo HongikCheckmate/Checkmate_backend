@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import project.project1.user.SiteUser;
 
 
 import java.util.Date;
@@ -48,7 +49,7 @@ public class JwtService {
     /**
      * AccessToken 생성 메소드
      */
-    public String createAccessToken(String username) {
+    public String createAccessToken(Long userId, String username) {
         Date now = new Date();
         return JWT.create() // JWT 토큰을 생성하는 빌더 반환
                 .withSubject(ACCESS_TOKEN_SUBJECT) // JWT의 Subject 지정 -> AccessToken이므로 AccessToken
@@ -56,6 +57,7 @@ public class JwtService {
 
                 //클레임으로는 저희는 username 하나만 사용 추가시 .withClaim(클래임 이름, 클래임 값) 으로 설정해주시면 됩니다
                 .withClaim(USERNAME_CLAIM, username)
+                .withClaim("userId", userId)
                 .sign(Algorithm.HMAC512(secretkey)); // HMAC512 알고리즘 사용, application-jwt.yml에서 지정한 secret 키로 암호화
     }
 

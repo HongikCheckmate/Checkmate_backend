@@ -26,8 +26,13 @@ public class OAuthController {
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
 
         Authentication authentication = authenticationManager.authenticate(authToken);
+        String username = authentication.getName();
 
-        String accessToken = jwtService.createAccessToken(authentication.getName());
+        Long userId = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username))
+                .getId();
+
+        String accessToken = jwtService.createAccessToken(userId, username);
         String refreshToken = jwtService.createRefreshToken();
 
         return ResponseEntity.ok(Map.of(

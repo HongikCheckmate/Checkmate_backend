@@ -1,4 +1,4 @@
-package project.project1.goal.certification.external;
+package project.project1.goal.certification.external.solvedac;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -12,6 +12,4 @@ public class SolvedSubmission {
     private int problemId;
     private String result; // 예: "AC", "WA"
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime submittedAt;
 }
