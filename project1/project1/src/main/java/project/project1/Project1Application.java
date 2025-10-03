@@ -13,7 +13,7 @@ public class Project1Application {
 	public static void main(String[] args) {
 		SpringApplication.run(Project1Application.class, args);
 
-		log.info("Test #2 for CI/CD!");
+		log.info("Test #3 for CI/CD!");
 	}
 
 }
