@@ -32,12 +32,17 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build
 
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+    
     # Docker build & Push 
     - name: Docker build & push to Docker hub
       run: |
-        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/docker-test .
-        docker push ${{ secrets.DOCKER_USERNAME }}/docker-test
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/checkmate .
+        docker push ${{ secrets.DOCKER_USERNAME }}/checkmate
 
     # EC2 배포
     - name: Docker image pull & Deploy to EC2
@@ -48,8 +53,8 @@ jobs:
         key: ${{ secrets.EC2_PRIVATE_KEY }} # pem 키
         # 도커 작업
         script: |
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/checkmate:latest
           sudo docker stop $(sudo docker ps -a -q)
-          sudo docker run -d --log-driver=syslog -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/docker-test:latest
+          sudo docker run -d --log-driver=syslog -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/checkmate:latest
           sudo docker rm $(sudo docker ps --filter 'status=exited' -a -q)
           sudo docker image prune -a -f
