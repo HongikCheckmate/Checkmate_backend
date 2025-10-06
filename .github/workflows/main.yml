@@ -69,7 +69,6 @@ jobs:
           # 새로 실행 (환경변수는 --env-file에)
           sudo docker run -d \
             --name "$CONTAINER" \
-            --restart=always \
             --log-driver=syslog \
             --env-file /opt/checkmate/.env \
             -p 8080:8080 \
