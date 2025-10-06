@@ -57,6 +57,6 @@ jobs:
         script: |
           sudo docker pull ${{ secrets.DOCKER_USERNAME }}/checkmate:latest
           sudo docker stop $(sudo docker ps -a -q)
-          sudo docker run -d --log-driver=syslog -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/checkmate:latest
-          sudo docker rm $(sudo docker ps --filter 'status=exited' -a -q)
+          sudo docker rm -f checkmate-app 2>/dev/null || true
+          sudo docker run -d --log-driver=syslog --env-file /opt/checkmate/.env -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/checkmate:latest
           sudo docker image prune -a -f
