@@ -1,0 +1,14 @@
+spring:
+  config:
+    activate:
+      on-profile: oauth
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            redirect-uri: ${GITHUB_REDIRECT_URI:http://localhost:8080/login/oauth2/code/github}
+          google:
+            scope: email,profile
+            redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}

@@ -1,0 +1,21 @@
+# application.yml
+spring:
+  application:
+    name: project1
+
+  profiles:
+    group:
+      prod:
+        - oauth
+        - secrets
+
+  jpa:
+    show-sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+file:
+  upload-dir: ${FILE_UPLOAD_DIR:/opt/checkmate/uploads}
