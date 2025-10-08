@@ -1,57 +1,55 @@
 package project.project1.user;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import jakarta.validation.Valid;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.util.Optional;
+import java.util.Objects;
 
+
+@Slf4j
 @RequiredArgsConstructor
-@Controller
-@RequestMapping("/user")
+@RestController
+@RequestMapping("/api/user")
 public class UserController {
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
 
-    @GetMapping("/signup")
-    public String signupForm(SignUpForm signUpForm) {
-        return "user/signup_form";
-    }
 
     @PostMapping("/signup")
-    public String signup(@RequestBody SignUpForm signUpForm, BindingResult bindingResult) throws Exception{
-        if (!signUpForm.getCheck_password().equals(signUpForm.getPassword())) {
-            bindingResult.rejectValue("check_password", "PasswordInCorrect", "비밀번호가 일치하지 않습니다.");
-            return "user/signup_form";
+    public ResponseEntity<String> signup(@RequestBody SignUpForm signUpForm) {
+        if (signUpForm.getPassword() == null || signUpForm.getCheck_password() == null) {
+            return ResponseEntity.badRequest().body("비밀번호를 입력하세요.");
         }
 
-        userService.create(signUpForm);
-        return "redirect:/user/login";
-    }
+        if (!Objects.equals(signUpForm.getPassword(), signUpForm.getCheck_password())) {
+            return ResponseEntity.badRequest().body("비밀번호가 일치하지 않습니다.");
+        }
 
-    @GetMapping("/login")
-    public String login() {
-        return "user/login_form";
+        try {
+            userService.create(signUpForm);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+        return ResponseEntity.ok("회원가입이 성공적으로 완료되었습니다.");
     }
 
     @GetMapping("/mypage")
-    public String myPage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+    public ResponseEntity<UserDataUpdate> myPage(@AuthenticationPrincipal UserDetails userDetails) {
+        // userDetails가 null인 경우를 대비한 방어 코드 (JwtAuthenticationFilter가 잘 동작하면 필요 없을 수 있음)
+        if (userDetails == null) {
+            // Spring Security 설정이 잘 되어있다면 이 코드는 실행되지 않음
+            return ResponseEntity.status(401).build(); // Unauthorized
+        }
+
         String username = userDetails.getUsername();
         SiteUser user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found: " + username));
@@ -62,22 +60,20 @@ public class UserController {
         update.setPhone_number(user.getPhone_number());
         update.setEmail(user.getEmail());
 
-        model.addAttribute("update", update);
-        return "user/myinfo_form";
+        return ResponseEntity.ok(update);
     }
 
     @PostMapping("/mypage")
-    public String updateMyPage(@AuthenticationPrincipal UserDetails userDetails, @ModelAttribute("update") UserDataUpdate update) {
+    public ResponseEntity<Void> updateMyPage(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserDataUpdate update) { // @ModelAttribute 대신 @RequestBody
         String currentuser = userDetails.getUsername();
         SiteUser user = userRepository.findByUsername(currentuser)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found: " + currentuser));
 
-        user.setUsername(update.getUsername());
         user.setNickname(update.getNickname());
         user.setEmail(update.getEmail());
         user.setPhone_number(update.getPhone_number());
-
         userRepository.save(user);
-        return "redirect:/user/mypage";
+
+        return ResponseEntity.ok().build(); // 성공 응답 (body 없음)
     }
 }

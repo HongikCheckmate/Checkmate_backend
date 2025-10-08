@@ -13,6 +13,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import project.project1.user.SiteUser;
 import project.project1.user.UserRepository;
@@ -34,43 +35,44 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
-    private static final String NO_CHECK_URL = "/user/login"; // "/user/login"으로 들어오는 요청은 Filter 작동 X
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
-@Override
-protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-    if (request.getRequestURI().equals(NO_CHECK_URL)) {
-        filterChain.doFilter(request, response); // "/login" 요청이 들어오면, 다음 필터 호출
-        return; // return으로 이후 현재 필터 진행 막기 (안해주면 아래로 내려가서 계속 필터 진행시킴)
+    /**
+     * 특정 URL은 이 필터를 거치지 않도록 설정
+     * true를 반환하면 doFilterInternal()이 실행되지 않음
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        // 로그인과 회원가입 경로는 필터를 통과시키지 않음
+        return pathMatcher.match("/user/login", requestURI) ||
+                pathMatcher.match("/api/user/login", requestURI);
+
     }
 
-    // 사용자 요청 헤더에서 RefreshToken 추출
-    // -> RefreshToken이 없거나 유효하지 않다면(DB에 저장된 RefreshToken과 다르다면) null을 반환
-    // 사용자의 요청 헤더에 RefreshToken이 있는 경우는, AccessToken이 만료되어 요청한 경우밖에 없다.
-    // 따라서, 위의 경우를 제외하면 추출한 refreshToken은 모두 null
-    String refreshToken = jwtService.extractRefreshToken(request)
-            .filter(jwtService::isTokenValid)
-            .orElse(null);
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        // shouldNotFilter에서 이미 경로 체크를 했으므로, 여기서는 바로 토큰 검사 로직만 수행하면 됩니다.
+        // 기존의 if (request.getRequestURI().equals(NO_CHECK_URL)) {...} 블록은 삭제합니다.
 
-    // 리프레시 토큰이 요청 헤더에 존재했다면, 사용자가 AccessToken이 만료되어서
-    // RefreshToken까지 보낸 것이므로 리프레시 토큰이 DB의 리프레시 토큰과 일치하는지 판단 후,
-    // 일치한다면 AccessToken을 재발급해준다.
-    if (refreshToken != null) {
-        checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
-        return; // RefreshToken을 보낸 경우에는 AccessToken을 재발급 하고 인증 처리는 하지 않게 하기위해 바로 return으로 필터 진행 막기
-    }
+        String refreshToken = jwtService.extractRefreshToken(request)
+                .filter(jwtService::isTokenValid)
+                .orElse(null);
 
-    // RefreshToken이 없거나 유효하지 않다면, AccessToken을 검사하고 인증을 처리하는 로직 수행
-    // AccessToken이 없거나 유효하지 않다면, 인증 객체가 담기지 않은 상태로 다음 필터로 넘어가기 때문에 403 에러 발생
-    // AccessToken이 유효하다면, 인증 객체가 담긴 상태로 다음 필터로 넘어가기 때문에 인증 성공
-    if (refreshToken == null) {
-        checkAccessTokenAndAuthentication(request, response, filterChain);
+        if (refreshToken != null) {
+            checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
+            return;
+        }
+
+        if (refreshToken == null) {
+            checkAccessTokenAndAuthentication(request, response, filterChain);
+        }
     }
-}
 
     //[리프레시 토큰으로 유저 정보 찾기 & 액세스 토큰/리프레시 토큰 재발급 메소드]
     public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
@@ -96,15 +98,35 @@ protected void doFilterInternal(HttpServletRequest request, HttpServletResponse 
                                                   FilterChain filterChain) throws ServletException, IOException {
         log.info("checkAccessTokenAndAuthentication() 호출");
         jwtService.extractAccessToken(request)
-                .filter(jwtService::isTokenValid)
-                .ifPresent(accessToken -> jwtService.extractUsername(accessToken)
-                        .ifPresent(username -> userRepository.findByUsername(username)
-                                .ifPresent(this::saveAuthentication)));
+                .ifPresentOrElse(
+                        accessToken -> {
+                            log.info("액세스 토큰 존재함. 유효성 검사 시작");
+                            if (jwtService.isTokenValid(accessToken)) {
+                                log.info("액세스 토큰 유효함. 사용자명 추출 시도");
+                                jwtService.extractUsername(accessToken)
+                                        .ifPresentOrElse(
+                                                username -> {
+                                                    log.info("사용자명 추출 성공: {}", username);
+                                                    userRepository.findByUsername(username)
+                                                            .ifPresentOrElse(
+                                                                    this::saveAuthentication,
+                                                                    () -> log.warn("DB에 해당 사용자({})가 없습니다.", username)
+                                                            );
+                                                },
+                                                () -> log.warn("액세스 토큰에서 사용자명을 추출할 수 없습니다.")
+                                        );
+                            } else {
+                                log.warn("유효하지 않은 액세스 토큰입니다.");
+                            }
+                        },
+                        () -> log.info("요청 헤더에 액세스 토큰이 없습니다.")
+                );
 
         filterChain.doFilter(request, response);
     }
 
     public void saveAuthentication(SiteUser myUser) {
+        log.info("{} 사용자의 인증 정보를 저장합니다.", myUser.getUsername());
         String password = myUser.getPassword();
         if (password == null) { // 소셜 로그인 유저의 비밀번호 임의로 설정 하여 소셜 로그인 유저도 인증 되도록 설정
             password = PasswordUtil.generateRandomPassword();
@@ -121,5 +143,6 @@ protected void doFilterInternal(HttpServletRequest request, HttpServletResponse 
                         authoritiesMapper.mapAuthorities(userDetailsUser.getAuthorities()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        log.info("SecurityContext에 인증 정보 저장을 완료했습니다.");
     }
 }

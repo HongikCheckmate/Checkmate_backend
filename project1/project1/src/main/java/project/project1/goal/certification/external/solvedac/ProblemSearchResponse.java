@@ -15,5 +15,6 @@ public class ProblemSearchResponse {
     public static class ProblemItem {
         private int problemId;
         private String titleKo;
+        private int level;
     }
 }

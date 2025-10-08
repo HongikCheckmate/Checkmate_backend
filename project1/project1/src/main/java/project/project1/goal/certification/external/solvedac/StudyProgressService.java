@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import project.project1.goal.Goal;
 import project.project1.goal.GoalRepository;
-import project.project1.goal.certification.external.ProblemGoalType;
 import project.project1.user.SiteUser;
 import project.project1.user.UserRepository;
 
 @Service
 @RequiredArgsConstructor
-public class SolvedAcCheckService {
+public class StudyProgressService {
     private final SolvedAcCertificationService solvedAcCertificationService;
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
@@ -28,7 +27,7 @@ public class SolvedAcCheckService {
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new IllegalArgumentException("목표를 찾을 수 없습니다."));
 
-        String handle = user.getSolvedAcHandle(); // DB에 저장된 사용자의 핸들을 사용합니다.
+        String handle = user.getSolvedAcHandle();
 
         return switch (goal.getProblemGoalType()) {
 

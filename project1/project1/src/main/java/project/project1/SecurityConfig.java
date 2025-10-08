@@ -3,25 +3,19 @@ package project.project1;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.csrf.CsrfFilter;
 import project.project1.user.UserLoginService;
 import project.project1.user.UserRepository;
 import project.project1.user.json.CustomJsonUsernamePasswordAuthenticationFilter;
@@ -69,7 +63,8 @@ public class SecurityConfig {
                         )
                 )
                 .authorizeHttpRequests((auth) -> auth
-//                .requestMatchers("/api/**","/swagger-ui/**", "/v3/**", "/h2-console/**", "/user/**", "/css/**", "/js/**").permitAll() //비회원 허용 경로
+                                .requestMatchers("/api/user/signup", "/user/signup").permitAll()
+                                .requestMatchers("/swagger-ui/**", "/v3/**", "/h2-console/**").permitAll()
                                 .requestMatchers("/api/oauth2/sign-up").hasRole("GUEST")
                                 .anyRequest().permitAll() //모든 접속 허용
 //                                .anyRequest().authenticated()

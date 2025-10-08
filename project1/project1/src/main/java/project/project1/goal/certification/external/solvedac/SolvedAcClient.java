@@ -23,7 +23,7 @@ public class SolvedAcClient {
     // 문제 총 푼 개수 확인
     public int getSolvedCount(String handle) {
         UserProblemStatsResponse response = webClient.get()
-                .uri("/user/problem_stats?handle={handle}", handle)
+                .uri("/user/show?handle={handle}", handle)
                 .retrieve()
                 .bodyToMono(UserProblemStatsResponse.class)
                 .block();

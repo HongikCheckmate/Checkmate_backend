@@ -47,7 +47,7 @@ public class GoalController {
         model.addAttribute("groupId", groupId);
         List<Group> groups = groupService.findAllGroups();
         model.addAttribute("certificationTypes", CertificationType.values());
-        model.addAttribute("goal", new Goal()); // 폼 데이터를 담을 객체
+        model.addAttribute("goal", Goal.builder().build()); // 폼 데이터를 담을 객체
 
         return "goal/goal-form";
 

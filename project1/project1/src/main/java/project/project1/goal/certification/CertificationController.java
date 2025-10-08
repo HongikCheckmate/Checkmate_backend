@@ -98,11 +98,11 @@ public class CertificationController {
     @PostMapping("/external")
     public ResponseEntity<Certification> certifyExternal(
             @RequestBody ExternalCertificationRequest req,
-            @AuthenticationPrincipal SiteUser user
+            Principal principal
             ) {
-        Long userId = user.getId();
-        Certification cert = certificationService.certifyExternal(userId, req.getGoalId(), req.getHandle(), req.getMethod());
-        return ResponseEntity.ok(cert);
+        SiteUser currentUser = userRepository.findByUsername(principal.getName()).orElseThrow();
+        certificationService.certifyExternal(currentUser.getId(), req.getGoalId(), req.getMethod());
+        return ResponseEntity.ok().build();
     }
 
     /**

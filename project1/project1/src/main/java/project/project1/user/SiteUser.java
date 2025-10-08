@@ -36,6 +36,9 @@ public class SiteUser {
 
     private String socialId; // 소셜ID
 
+    @Column(unique = true)
+    private String solvedAcHandle; // 백준 아이디
+
     @Enumerated(EnumType.STRING)
     private SocialType socialType; // 소셜타입
 

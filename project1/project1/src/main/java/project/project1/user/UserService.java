@@ -19,19 +19,17 @@ public class UserService {
         }
 
         if (userRepository.findByUsername(signUpForm.getUsername()).isPresent()) {
-            throw new Exception("이미 존재하는 닉네임입니다.");
+            throw new Exception("이미 존재하는 아이디입니다.");
         }
 
-        SiteUser user = SiteUser.builder()
-                .username(signUpForm.getUsername())
-                .password(signUpForm.getPassword())
-                .nickname(signUpForm.getNickname())
-                .email(signUpForm.getEmail())
-                .phone_number(signUpForm.getPhone_number())
-                .role(UserRole.USER)
-                .build();
+        SiteUser user = new SiteUser();
+        user.setUsername(signUpForm.getUsername());
+        user.setPassword(passwordEncoder.encode(signUpForm.getPassword()));
+        user.setNickname(signUpForm.getNickname());
+        user.setEmail(signUpForm.getEmail());
+        user.setPhone_number(signUpForm.getPhone_number());
+        user.setRole(UserRole.USER); // 기본 권한 설정
 
-        user.passwordEncode(passwordEncoder);
         userRepository.save(user);
         return user;
     }

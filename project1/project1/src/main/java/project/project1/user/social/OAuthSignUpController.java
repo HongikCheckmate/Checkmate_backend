@@ -19,31 +19,6 @@ public class OAuthSignUpController {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
-    @PostMapping("/login-test")
-    public ResponseEntity<?> socialLoginTest(@RequestParam("username") String username) {
-        // 기존 유저 확인
-        SiteUser user = userRepository.findByUsername(username).orElse(null);
-
-        if (user == null) {
-            user = SiteUser.builder()
-                    .username(username)
-                    .role(UserRole.GUEST) // 최초에는 게스트
-                    .build();
-            userRepository.save(user);
-        }
-
-        // JWT 발급
-        String accessToken = jwtService.createAccessToken(user.getId(), user.getUsername());
-        String refreshToken = jwtService.createRefreshToken();
-        jwtService.updateRefreshToken(user.getUsername(), refreshToken);
-
-        return ResponseEntity.ok(Map.of(
-                "accessToken", accessToken,
-                "refreshToken", refreshToken,
-                "isGuest", user.getRole() == UserRole.GUEST
-        ));
-    }
-
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@RequestBody SignUpRequest request, Principal principal) {
 
