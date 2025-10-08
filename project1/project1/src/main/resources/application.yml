@@ -8,6 +8,9 @@ spring:
       prod:
         - oauth
         - secrets
+      dev:
+        - oauth
+        - secrets
 
   jpa:
     show-sql: true
