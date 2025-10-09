@@ -16,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import project.project1.user.UserLoginService;
 import project.project1.user.UserRepository;
 import project.project1.user.json.CustomJsonUsernamePasswordAuthenticationFilter;
@@ -26,6 +29,8 @@ import project.project1.user.jwt.JwtService;
 import project.project1.user.social.CustomOAuth2UserService;
 import project.project1.user.social.OAuth2LoginFailureHandler;
 import project.project1.user.social.OAuth2LoginSuccessHandler;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -120,5 +125,19 @@ public class SecurityConfig {
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
         JwtAuthenticationProcessingFilter jwtAuthenticationFilter = new JwtAuthenticationProcessingFilter(jwtService, userRepository);
         return jwtAuthenticationFilter;
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(){
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(Arrays.asList("Content-Type"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
