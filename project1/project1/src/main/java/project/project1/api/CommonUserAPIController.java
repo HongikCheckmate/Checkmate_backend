@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 import project.project1.user.SiteUser;
 import project.project1.user.UserRepository;
 
-@Tag(name = "User API", description = "유저 관련 API")
+@Tag(name = "Common User API", description = "전체 유저 관련 API")
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
-public class UserAPIController {
+public class CommonUserAPIController {
 
     private final UserRepository userRepository;
 
     @Operation(summary = "유저 닉네임 목록 조회",
                     description = "유저의 닉네임 목록을 반환합니다. 검색어 필터링이 가능합니다.")
-    @GetMapping("/nicknames")
+    @GetMapping("/search")
     public ResponseEntity<Page<String>> getPagedNicknames(
             @Parameter(description = "닉네임 검색 키워드(부분 일치)") @RequestParam(required = false) String search,
             @Parameter(hidden = true) Pageable pageable)
