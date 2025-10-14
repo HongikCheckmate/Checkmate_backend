@@ -16,7 +16,7 @@ import project.project1.user.UserRepository;
 import java.util.List;
 
 @Controller
-@RequestMapping("/groups")
+@RequestMapping("/group")
 public class GroupController {
 
     private final GroupService groupService;
@@ -49,7 +49,7 @@ public class GroupController {
                 groupForm.getPassword(),
                 userRepository.findByUsername(userDetails.getUsername()).get().getId()
         );
-        return "redirect:/groups/list"; // 이후 그룹 목록 페이지로 리디렉션 (추가 개발 필요)
+        return "redirect:/group/list"; // 이후 그룹 목록 페이지로 리디렉션 (추가 개발 필요)
     }
 
     // 그룹 가입 폼 보여주기
@@ -75,7 +75,7 @@ public class GroupController {
         // memberId는 로그인한 사용자 ID로 자동 설정
         groupService.joinGroup(joinForm.getGroupId(), user.getId());
 
-        return "redirect:/groups/list";
+        return "redirect:/group/list";
     }
 
     @GetMapping("/list")
