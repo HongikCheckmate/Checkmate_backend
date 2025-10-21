@@ -3,6 +3,7 @@ package project.project1.certification;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import project.project1.goal.certification.external.solvedac.SolvedAcCertificationService;
 import project.project1.goal.certification.external.solvedac.SolvedAcClient;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@ActiveProfiles("test")
 public class SolvedAcClientIntegrationTest {
     @Autowired
     private SolvedAcClient solvedAcClient;
