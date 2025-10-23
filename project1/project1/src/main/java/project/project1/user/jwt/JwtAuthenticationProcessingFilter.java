@@ -49,9 +49,24 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String requestURI = request.getRequestURI();
-        // 로그인과 회원가입 경로는 필터를 통과시키지 않음
-        return pathMatcher.match("/user/login", requestURI) ||
-                pathMatcher.match("/api/user/login", requestURI);
+        String[] permitAllPaths = {
+                "/api/user/signup",
+                "/user/signup",
+                "/api/user/login",
+                "/user/login",
+                "/swagger-ui/",
+                "/v3/",
+                "/h2-console/**",
+                "/api/oauth2/sign-up"
+        };
+
+        for (String path : permitAllPaths) {
+            if (pathMatcher.match(path, requestURI)) {
+                return true; // true를 반환하여 필터링을 건너뜀
+            }
+        }
+
+        return false;
 
     }
 
