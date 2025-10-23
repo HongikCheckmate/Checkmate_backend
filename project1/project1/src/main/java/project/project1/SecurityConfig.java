@@ -46,6 +46,9 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+
         http
                 .formLogin((formLogin) -> formLogin.disable()) // FormLogin 사용 X
                 .httpBasic((httpBasic) -> httpBasic.disable())
@@ -127,12 +130,11 @@ public class SecurityConfig {
         return jwtAuthenticationFilter;
     }
 
-    @Bean
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("Content-Type"));
+        config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
