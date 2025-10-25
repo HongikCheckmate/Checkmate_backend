@@ -26,13 +26,13 @@ public class CommonUserAPIController {
                     description = "유저의 닉네임 목록을 반환합니다. 검색어 필터링이 가능합니다.")
     @GetMapping("/search")
     public ResponseEntity<Page<String>> getPagedNicknames(
-            @Parameter(description = "닉네임 검색 키워드(부분 일치)") @RequestParam(required = false) String search,
+            @Parameter(description = "닉네임 검색 키워드(부분 일치)") @RequestParam(required = false) String query,
             @Parameter(hidden = true) Pageable pageable)
     {
         Page<String> nicknamePage;
 
-        if (search != null && !search.isEmpty()) {
-            nicknamePage = userRepository.findByNicknameContainingIgnoreCase(search, pageable)
+        if (query != null && !query.isEmpty()) {
+            nicknamePage = userRepository.findByNicknameContainingIgnoreCase(query, pageable)
                     .map(SiteUser::getNickname);
         } else {
             nicknamePage = userRepository.findAll(pageable)
