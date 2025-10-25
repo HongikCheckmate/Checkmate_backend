@@ -15,10 +15,14 @@ public class LoginFailureHandler extends SimpleUrlAuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException {
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/plain;charset=UTF-8");
-        response.getWriter().write("로그인 실패 아이디나 비밀번호를 확인해주세요.");
-        log.info("로그인에 실패했습니다. 메시지 : {}", exception.getMessage());
+        log.warn("로그인 실패. 이유: {}", exception.getMessage());
+
+        // 3. 클라이언트에게 보낼 응답 설정
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 상태 코드
+        response.setContentType("application/json;charset=UTF-8");
+
+        // 4. 클라이언트에게 'null' 대신 구체적인 에러 메시지 전송
+        String errorMessage = "아이디 또는 비밀번호가 일치하지 않습니다."; // 사용자에게 보여줄 메시지
+        response.getWriter().write("{\"success\": false, \"error\": \"" + errorMessage + "\"}");
     }
 }
