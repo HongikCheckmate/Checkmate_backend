@@ -35,8 +35,9 @@ class GroupListTest {
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
+
         groupRepository.deleteAll();
+        userRepository.deleteAll();
 
         SiteUser a = userRepository.save(SiteUser.builder().username("A유저").nickname("A유저닉네임").build());
         SiteUser b = userRepository.save(SiteUser.builder().username("B유저").nickname("B유저닉네임").build());

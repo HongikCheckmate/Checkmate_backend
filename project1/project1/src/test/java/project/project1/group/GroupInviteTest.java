@@ -1,6 +1,7 @@
 package project.project1.group;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import project.project1.group.invite.GroupInviteController;
+import project.project1.group.invite.GroupInviteRepository;
 import project.project1.group.invite.dto.*;
 import project.project1.user.SiteUser;
 import project.project1.user.UserRepository;
@@ -35,14 +38,18 @@ class GroupInviteTest {
     @Autowired
     private GroupRepository groupRepository;
 
+    @Autowired
+    private GroupInviteRepository groupInviteRepository;
+
     private Long inviterId;
     private Long inviteeId;
     private Long groupId;
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
+        groupInviteRepository.deleteAll();
         groupRepository.deleteAll();
+        userRepository.deleteAll();
 
         SiteUser a = userRepository.save(SiteUser.builder().username("A유저").build());
         SiteUser b = userRepository.save(SiteUser.builder().username("B유저").build());
@@ -89,4 +96,12 @@ class GroupInviteTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("ACCEPTED"));
     }
+
+    @AfterEach
+    void afterEach(){
+        groupInviteRepository.deleteAll();
+        groupRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
 }
