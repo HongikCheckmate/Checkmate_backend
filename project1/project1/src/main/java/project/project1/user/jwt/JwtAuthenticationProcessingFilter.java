@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
+import project.project1.user.CustomUserDetails;
 import project.project1.user.SiteUser;
 import project.project1.user.UserRepository;
 import project.project1.user.social.PasswordUtil;
@@ -54,8 +55,8 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 "/user/signup",
                 "/api/user/login",
                 "/user/login",
-                "/swagger-ui/",
-                "/v3/",
+                "/swagger-ui/**",
+                "/v3/**",
                 "/h2-console/**",
                 "/api/oauth2/sign-up"
         };
@@ -72,21 +73,22 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // shouldNotFilter에서 이미 경로 체크를 했으므로, 여기서는 바로 토큰 검사 로직만 수행하면 됩니다.
-        // 기존의 if (request.getRequestURI().equals(NO_CHECK_URL)) {...} 블록은 삭제합니다.
-
         String refreshToken = jwtService.extractRefreshToken(request)
                 .filter(jwtService::isTokenValid)
                 .orElse(null);
 
         if (refreshToken != null) {
-            checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
-            return;
+            userRepository.findByRefreshToken(refreshToken)
+                    .ifPresent(user -> {
+                        String reIssuedRefreshToken = reIssueRefreshToken(user);
+                        jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getId(), user.getUsername()),
+                                reIssuedRefreshToken);
+                    });
         }
 
-        if (refreshToken == null) {
-            checkAccessTokenAndAuthentication(request, response, filterChain);
-        }
+
+        checkAccessTokenAndAuthentication(request, response, filterChain);
+
     }
 
     //[리프레시 토큰으로 유저 정보 찾기 & 액세스 토큰/리프레시 토큰 재발급 메소드]
@@ -146,16 +148,13 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         if (password == null) { // 소셜 로그인 유저의 비밀번호 임의로 설정 하여 소셜 로그인 유저도 인증 되도록 설정
             password = PasswordUtil.generateRandomPassword();
         }
-
-        UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder()
-                .username(myUser.getUsername())
-                .password(password)
-                .roles(myUser.getRole().name())
-                .build();
+        CustomUserDetails userDetails = new CustomUserDetails(myUser);
 
         UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(userDetailsUser, null,
-                        authoritiesMapper.mapAuthorities(userDetailsUser.getAuthorities()));
+                new UsernamePasswordAuthenticationToken(
+                        userDetails, // <--- 수정된 부분!
+                        null,
+                        userDetails.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.info("SecurityContext에 인증 정보 저장을 완료했습니다.");
