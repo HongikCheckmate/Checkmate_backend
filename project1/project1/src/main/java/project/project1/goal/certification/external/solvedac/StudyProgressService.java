@@ -27,16 +27,30 @@ public class StudyProgressService {
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new IllegalArgumentException("목표를 찾을 수 없습니다."));
 
-        String handle = user.getSolvedAcHandle();
+        SolvedAcUser solvedAcUser = user.getSolvedAcUser();
+        if (solvedAcUser == null) {
+            return false;
+        }
+        String handle = solvedAcUser.getHandle();
 
-        return switch (goal.getProblemGoalType()) {
+        if (!(goal instanceof SolvedAcGoal)) {
+            // Solved.ac 목표가 아니면 이 서비스에서 검증할 수 없습니다.
+            // false를 반환하거나 예외를 던질 수 있습니다.
+            throw new IllegalArgumentException("이 목표는 Solved.ac 목표가 아닙니다.");
+        }
+
+        // 3. 자식 타입으로 안전하게 형변환합니다.
+        SolvedAcGoal solvedAcGoal = (SolvedAcGoal) goal;
+
+        // 4. 형변환된 'solvedacGoal' 객체의 메서드를 사용합니다.
+        return switch (solvedAcGoal.getProblemGoalType()) {
 
             case COUNT -> {
-                // 3. Goal 엔티티의 헬퍼 메서드를 통해 startCount를 가져옵니다.
-                int startCount = goal.getStartCountForUser(userId);
+                // 'solvedAcGoal'의 헬퍼 메서드를 통해 startCount를 가져옵니다.
+                int startCount = solvedAcGoal.getStartCountForUser(userId);
                 yield solvedAcCertificationService.verifyNProblemsSolvedInPeriod(
                         handle,
-                        goal.getProblemCount(),
+                        solvedAcGoal.getProblemCount(), // solvedacGoal.get...
                         startCount
                 );
             }
@@ -44,7 +58,7 @@ public class StudyProgressService {
             case SPECIFIC -> {
                 yield solvedAcCertificationService.verifySpecificProblemsSolved(
                         handle,
-                        goal.getTargetProblemIds()
+                        solvedAcGoal.getTargetProblemIds() // solvedacGoal.get...
                 );
             }
         };

@@ -1,15 +1,15 @@
 package project.project1.goal.certification.external.solvedac;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import project.project1.goal.Goal;
 
 @Entity
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TargetProblem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,5 +19,5 @@ public class TargetProblem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "goal_id")
-    private Goal goal;
+    private SolvedAcGoal goal;
 }

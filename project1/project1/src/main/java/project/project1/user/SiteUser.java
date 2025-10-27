@@ -3,6 +3,8 @@ package project.project1.user;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import project.project1.goal.certification.external.github.GithubUser;
+import project.project1.goal.certification.external.solvedac.SolvedAcUser;
 import project.project1.user.social.SocialType;
 
 @Getter
@@ -36,20 +38,18 @@ public class SiteUser {
 
     private String socialId; // 소셜ID
 
-    @Column(unique = true)
-    private String solvedAcHandle; // 백준 아이디
-
     @Enumerated(EnumType.STRING)
     private SocialType socialType; // 소셜타입
 
     private String refreshToken; // 리프레시 토큰
 
-    public void passwordEncode(PasswordEncoder passwordEncoder) {
-        this.password = passwordEncoder.encode(this.password);
-    }
-
     public void updateRefreshToken(String updateRefreshToken) {
         this.refreshToken = updateRefreshToken; // 리프레시 토큰 재발급
     }
 
+    @OneToOne(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private SolvedAcUser solvedAcUser;
+
+    @OneToOne(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private GithubUser githubUser;
 }

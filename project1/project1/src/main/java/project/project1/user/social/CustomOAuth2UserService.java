@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import project.project1.goal.certification.external.github.GithubUser;
 import project.project1.user.SiteUser;
 import project.project1.user.UserRepository;
 
@@ -58,7 +59,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuthAttributes extractAttributes = OAuthAttributes.of(socialType, userNameAttributeName, attributes);
         log.info("extractAttributes = {}", extractAttributes);   // ✅ 매핑 결과 확인
 
-        SiteUser createdUser = getUser(extractAttributes, socialType); // getUser() 메소드로 User 객체 생성 후 반환
+        String accessToken = userRequest.getAccessToken().getTokenValue();
+        SiteUser createdUser = getUser(extractAttributes, socialType, accessToken);
         log.info("createdUser = {}", createdUser);   // ✅ DB 저장/조회 결과 확인
 
         // DefaultOAuth2User를 구현한 CustomOAuth2User 객체를 생성해서 반환
@@ -88,23 +90,40 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
      * SocialType과 attributes에 들어있는 소셜 로그인의 식별값 id를 통해 회원을 찾아 반환하는 메소드
      * 만약 찾은 회원이 있다면, 그대로 반환하고 없다면 saveUser()를 호출하여 회원을 저장한다.
      */
-    private SiteUser getUser(OAuthAttributes attributes, SocialType socialType) {
+    private SiteUser getUser(OAuthAttributes attributes, SocialType socialType, String accessToken) {
         SiteUser findUser = userRepository.findBySocialTypeAndSocialId(socialType,
                 attributes.getOAuth2UserForm().getId()).orElse(null);
 
-        if(findUser == null) {
-            return saveUser(attributes, socialType);
-        }
-        return findUser;
-    }
+        if (findUser == null) {
+            SiteUser newUser = attributes.toEntity(socialType, attributes.getOAuth2UserForm());
+            if (socialType == SocialType.GITHUB) {
+                GithubUser githubUser = new GithubUser();
+                // OAuthAttributes에서 github 사용자 이름(login)을 가져와야 합니다.
+                // OAuth2UserInfo에 getNickname() 같은 메서드가 있다고 가정합니다.
+                githubUser.setGithubUsername(attributes.getOAuth2UserForm().getNickname());
+                githubUser.setGithubAccessToken(accessToken); // 암호화 필요
 
-    /**
-     * OAuthAttributes의 toEntity() 메소드를 통해 빌더로 User 객체 생성 후 반환
-     * 생성된 User 객체를 DB에 저장 : socialType, socialId, email, role 값만 있는 상태
-     */
-    private SiteUser saveUser(OAuthAttributes attributes, SocialType socialType) {
-        SiteUser createdUser = attributes.toEntity(socialType, attributes.getOAuth2UserForm());
-        return userRepository.save(createdUser);
+                // ★★★ SiteUser와 GithubUser를 연결합니다.
+                newUser.setGithubUser(githubUser);
+                githubUser.setSiteUser(newUser);
+            }
+            return userRepository.save(newUser);
+        } else {
+            // 기존 유저가 있다면 (특히 GitHub 유저라면) Access Token을 업데이트 해주는 것이 좋습니다.
+            if (socialType == SocialType.GITHUB) {
+                GithubUser githubUser = findUser.getGithubUser();
+                // 기존 유저인데 GithubUser 정보가 없는 예외적인 경우를 대비
+                if (githubUser == null) {
+                    githubUser = new GithubUser();
+                    githubUser.setGithubUsername(attributes.getOAuth2UserForm().getNickname());
+                    findUser.setGithubUser(githubUser);
+                    githubUser.setSiteUser(findUser);
+                }
+                githubUser.setGithubAccessToken(accessToken); // 토큰 갱신
+                return userRepository.save(findUser); // 변경된 정보 저장
+            }
+            return findUser;
+        }
     }
 
 }

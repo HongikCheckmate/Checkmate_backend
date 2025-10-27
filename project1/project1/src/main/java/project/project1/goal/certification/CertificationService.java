@@ -6,8 +6,12 @@ import org.springframework.web.multipart.MultipartFile;
 import project.project1.goal.Goal;
 import project.project1.goal.GoalService;
 import project.project1.goal.certification.external.ExternalCertificationMethod;
-import project.project1.goal.certification.external.solvedac.GoalMember;
+import project.project1.goal.certification.external.github.GithubGoal;
+import project.project1.goal.certification.external.github.GithubService;
+import project.project1.goal.certification.external.github.GithubUser;
 import project.project1.goal.certification.external.solvedac.SolvedAcCertificationService;
+import project.project1.goal.certification.external.solvedac.SolvedAcGoal;
+import project.project1.goal.certification.external.solvedac.SolvedAcUser;
 import project.project1.goal.certification.storage.FileStorageService;
 import project.project1.user.SiteUser;
 import project.project1.user.UserService;
@@ -29,6 +33,7 @@ public class CertificationService {
     private final GoalService goalService;
     private final UserService userService;
     private final SolvedAcCertificationService solvedAcService;
+    private final GithubService githubService;
 
     public Certification saveTextCertification(TextCertificationRequest req, Long userId, Long goalId) {
         SiteUser user = userService.findById(userId);
@@ -76,26 +81,53 @@ public class CertificationService {
 
     public Certification certifyExternal(Long userId, Long goalId, ExternalCertificationMethod method) {
         SiteUser user = userService.findById(userId);
-        String handle = user.getSolvedAcHandle();
         Goal goal = goalService.findById(goalId);
-
+        SolvedAcUser solvedAcUser = user.getSolvedAcUser();
+        GithubUser githubUser = user.getGithubUser();
         boolean success = switch (method) {
             case SOLVED_AC -> {
-                yield switch (goal.getProblemGoalType()) {
+                if (solvedAcUser == null) {
+                    throw new IllegalStateException("백준 핸들이 연동되지 않은 사용자입니다.");
+                }
 
-                    // [개선] startCount를 찾는 복잡한 로직이 사라지고, Goal의 메서드 호출로 변경됨
+                // --- (수정) 타입 확인 및 형변환 ---
+                if (!(goal instanceof SolvedAcGoal)) {
+                    throw new IllegalArgumentException("이 목표는 Solved.ac 목표가 아닙니다.");
+                }
+                // 2. 자식 타입으로 형변환
+                SolvedAcGoal solvedacGoal = (SolvedAcGoal) goal;
+                String handle = solvedAcUser.getHandle();
+
+                // 3. 자식 타입(SolvedacGoal)의 메서드 사용
+                yield switch (solvedacGoal.getProblemGoalType()) {
                     case COUNT -> solvedAcService.verifyNProblemsSolvedInPeriod(
                             handle,
-                            goal.getProblemCount(),
-                            goal.getStartCountForUser(userId) // Goal의 헬퍼 메서드 사용
+                            solvedacGoal.getProblemCount(),         // solvedacGoal.get...
+                            solvedacGoal.getStartCountForUser(userId) // solvedacGoal.get...
                     );
                     case SPECIFIC -> solvedAcService.verifySpecificProblemsSolved(
                             handle,
-                            goal.getTargetProblemIds()
+                            solvedacGoal.getTargetProblemIds()    // solvedacGoal.get...
                     );
                 };
+                // ---------------------------------
             }
-//        case GITHUB -> githubService.verify(handle, goal); // 추후 구현
+            case GITHUB -> {
+                if (githubUser == null) {
+                    throw new IllegalStateException("GitHub 계정이 연동되지 않았습니다.");
+                }
+
+                // --- (수정) 타입 확인 및 형변환 ---
+                if (!(goal instanceof GithubGoal)) {
+                    throw new IllegalArgumentException("이 목표는 GitHub 목표가 아닙니다.");
+                }
+                // 2. 자식 타입으로 형변환
+                GithubGoal githubGoal = (GithubGoal) goal;
+
+                // 3. (중요) GithubService의 verify 메서드도 GithubGoal 타입을 받도록 수정해야 함
+                yield githubService.verify(githubUser, githubGoal);
+                // ---------------------------------
+            }
         };
         if (!success) {
             throw new IllegalStateException("인증 조건을 충족하지 못했습니다.");
