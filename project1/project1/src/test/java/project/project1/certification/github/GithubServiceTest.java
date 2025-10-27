@@ -81,8 +81,15 @@ public class GithubServiceTest {
     @DisplayName("성공: 현재 주기 내에 커밋(PushEvent)이 있으면 true를 반환한다")
     void verify_success_when_commit_exists_in_cycle() {
         // given
-        String nowString = LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
-        Map<String, Object> pushEvent = Map.of("type", "PushEvent", "created_at", nowString);
+        String nowString = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
+
+        Map<String, Object> repoData = Map.of("name", "testUser/testRepo");
+        Map<String, Object> pushEvent = Map.of(
+                "type", "PushEvent",
+                "created_at", nowString,
+                "repo", repoData // 👈 "repo" 키와 데이터 추가
+        );
+
         List<Map<String, Object>> fakeApiResponse = List.of(pushEvent);
 
         when(restTemplate.exchange(anyString(), any(HttpMethod.class), any(HttpEntity.class), any(ParameterizedTypeReference.class)))
@@ -99,8 +106,15 @@ public class GithubServiceTest {
     @DisplayName("실패: 주기 내에 커밋(PushEvent)이 없으면 false를 반환한다")
     void verify_fail_when_commit_not_exists_in_cycle() {
         // given
-        String oldDateString = LocalDateTime.now(ZoneOffset.UTC).minusDays(10).format(DateTimeFormatter.ISO_DATE_TIME);
-        Map<String, Object> oldPushEvent = Map.of("type", "PushEvent", "created_at", oldDateString);
+        String oldDateString = ZonedDateTime.now(ZoneOffset.UTC).minusDays(10).format(DateTimeFormatter.ISO_DATE_TIME);
+
+        Map<String, Object> repoData = Map.of("name", "testUser/testRepo");
+        Map<String, Object> oldPushEvent = Map.of(
+                "type", "PushEvent",
+                "created_at", oldDateString,
+                "repo", repoData
+        );
+
         List<Map<String, Object>> fakeApiResponse = List.of(oldPushEvent);
 
         when(restTemplate.exchange(anyString(), any(), any(), any(ParameterizedTypeReference.class)))

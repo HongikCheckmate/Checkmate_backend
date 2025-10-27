@@ -33,9 +33,8 @@ public class StudyProgressServiceTest {
     @Mock
     private GoalRepository goalRepository; // GoalRepository<Goal> (부모 타입)
 
-    // --- (수정) fakeGoal의 타입을 Goal -> SolvedacGoal로 변경 ---
     private SiteUser fakeUser;
-    private SolvedAcGoal fakeGoal; // 👈 (수정)
+    private SolvedAcGoal fakeGoal;
     private SolvedAcUser fakeSolvedAcUser;
     private Long userId = 1L;
     private Long goalId = 1L;
@@ -56,20 +55,16 @@ public class StudyProgressServiceTest {
 
         fakeUser.setSolvedAcUser(fakeSolvedAcUser);
 
-        // --- (수정) Goal.builder() -> new SolvedacGoal() ---
-        // 'Goal'은 추상 클래스이므로 'new Goal()'이나 'Goal.builder()' 사용 불가
-        // 실제 자식 클래스인 'SolvedacGoal'을 생성해야 함
-        fakeGoal = new SolvedAcGoal(); // 👈 (수정)
+        fakeGoal = new SolvedAcGoal();
         fakeGoal.setId(goalId);
         fakeGoal.setName("Test Goal");
-        // ----------------------------------------------------
 
         given(userRepository.findById(userId)).willReturn(Optional.of(fakeUser));
 
         // --- (수정) goalRepository가 자식 타입인 fakeGoal을 반환하도록 설정 ---
         // StudyProgressService는 Goal 타입으로 받지만,
         // (goal instanceof SolvedacGoal) 체크가 통과됨
-        given(goalRepository.findById(goalId)).willReturn(Optional.of(fakeGoal)); // 👈 (수정)
+        given(goalRepository.findById(goalId)).willReturn(Optional.of(fakeGoal));
     }
 
     @Test
@@ -86,7 +81,7 @@ public class StudyProgressServiceTest {
 
         // --- (수정) SolvedAcGoalMember.builder() -> new SolvedAcGoalMember() ---
         // (만약 @Builder를 자식 엔티티에도 추가했다면 .builder() 사용 가능)
-        SolvedAcGoalMember fakeMember = new SolvedAcGoalMember(); // 👈 (수정)
+        SolvedAcGoalMember fakeMember = new SolvedAcGoalMember();
         fakeMember.setUser(fakeUser);
         fakeMember.setGoal(fakeGoal);
         fakeMember.setStartCount(startCount);
@@ -112,16 +107,13 @@ public class StudyProgressServiceTest {
         String handle = fakeUser.getSolvedAcUser().getHandle();
         fakeGoal.setProblemGoalType(ProblemGoalType.SPECIFIC);
 
-        // --- (수정) TargetProblem.builder() -> new TargetProblem() ---
-        // (만약 @Builder를 TargetProblem에 추가했다면 .builder() 사용 가능)
-        TargetProblem problem1 = new TargetProblem(); // 👈 (수정)
+        TargetProblem problem1 = new TargetProblem();
         problem1.setProblemId(1000);
-        problem1.setGoal(fakeGoal); // 👈 (수정) fakeGoal은 SolvedacGoal 타입이므로 OK
+        problem1.setGoal(fakeGoal);
 
-        TargetProblem problem2 = new TargetProblem(); // 👈 (수정)
+        TargetProblem problem2 = new TargetProblem();
         problem2.setProblemId(1001);
-        problem2.setGoal(fakeGoal); // 👈 (수정)
-        // ---------------------------------------------------------
+        problem2.setGoal(fakeGoal);
 
         fakeGoal.setTargetProblems(List.of(problem1, problem2));
         List<Integer> targetIds = List.of(1000, 1001);
