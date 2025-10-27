@@ -88,7 +88,8 @@ public class GroupController {
     }
 
     // 그룹 검색
-    @GetMapping("/search")
+    @Deprecated(forRemoval = true)
+    //@GetMapping("/search")
     public String searchGroups(@RequestParam("keyword") String keyword,
                                @PageableDefault(size = 10) Pageable pageable,
                                Model model) {
