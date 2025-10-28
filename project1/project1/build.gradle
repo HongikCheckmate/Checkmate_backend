@@ -61,3 +61,7 @@ tasks.withType(JavaCompile) {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+test {
+	systemProperty 'jasypt.encryptor.password', 'dummypassword'
+}

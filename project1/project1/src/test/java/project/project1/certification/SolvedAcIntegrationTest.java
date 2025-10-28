@@ -12,7 +12,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
-@ActiveProfiles("test")
 public class SolvedAcIntegrationTest {
     @Autowired
     private SolvedAcCertificationService solvedAcService;

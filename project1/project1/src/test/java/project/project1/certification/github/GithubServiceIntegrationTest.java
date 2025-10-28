@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest // 스프링 애플리케이션 컨텍스트를 모두 로드
 @Transactional  // 테스트 후 DB 변경사항을 롤백하여 테스트 격리성 보장
-@ActiveProfiles("test") // test 프로파일을 활성화하여 application-test.properties를 사용
 public class GithubServiceIntegrationTest {
 //    @Autowired
 //    private GithubService githubService;

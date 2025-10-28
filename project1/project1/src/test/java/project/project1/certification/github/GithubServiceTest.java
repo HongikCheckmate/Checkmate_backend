@@ -12,6 +12,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 import project.project1.goal.Goal;
 import project.project1.goal.certification.external.github.GithubGoal;
@@ -108,7 +109,7 @@ public class GithubServiceTest {
         // given
         String oldDateString = ZonedDateTime.now(ZoneOffset.UTC).minusDays(10).format(DateTimeFormatter.ISO_DATE_TIME);
 
-        Map<String, Object> repoData = Map.of("name", "testUser/testRepo");
+        Map<String, Object> repoData = Map.of("name", "HongikCheckmate_backend/Checkmate_backend");
         Map<String, Object> oldPushEvent = Map.of(
                 "type", "PushEvent",
                 "created_at", oldDateString,
