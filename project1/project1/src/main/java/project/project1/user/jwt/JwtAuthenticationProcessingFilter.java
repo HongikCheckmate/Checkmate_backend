@@ -58,7 +58,6 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 "/swagger-ui/**",
                 "/v3/**",
                 "/h2-console/**",
-                "/api/oauth2/sign-up"
         };
 
         for (String path : permitAllPaths) {
