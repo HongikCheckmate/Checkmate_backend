@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class CustomJsonUsernamePasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-    private static final String DEFAULT_LOGIN_REQUEST_URL = "/user/login"; // "/login"으로 오는 요청을 처리
+    private static final String DEFAULT_LOGIN_REQUEST_URL = "/api/user/login"; // "/login"으로 오는 요청을 처리
     private static final String HTTP_METHOD = "POST"; // 로그인 HTTP 메소드는 POST
     private static final String USERNAME_KEY = "username"; // 회원 로그인 시 아이디 요청 JSON Key : "username"
     private static final String PASSWORD_KEY = "password"; // 회원 로그인 시 비밀번호 요청 JSon Key : "password"
