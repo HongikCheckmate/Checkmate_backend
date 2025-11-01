@@ -1,5 +1,6 @@
 package project.project1.user.json;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import project.project1.user.UserRepository;
 import project.project1.user.jwt.JwtService;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ import java.io.IOException;
 public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler  {
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
 
     @Value("${jwt.access.expiration}")
     private String accessTokenExpiration;
@@ -44,9 +48,13 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler  
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK); // 200 OK 상태 코드
 
-        response.getWriter().write(
-                "{\"success\": true, \"accessToken\": \"" + accessToken + "\", \"refreshToken\": \"" + refreshToken + "\"}"
-        );
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("success", true);
+        responseData.put("accessToken", accessToken);
+        responseData.put("refreshToken", refreshToken);
+        responseData.put("nickname", siteuser.getNickname());
+        objectMapper.writeValue(response.getWriter(), responseData);
+
         log.info("로그인에 성공하였습니다. 아이디 : {}", username);
         log.info("로그인에 성공하였습니다. AccessToken : {}", accessToken);
         log.info("발급된 AccessToken 만료 기간 : {}", accessTokenExpiration);
