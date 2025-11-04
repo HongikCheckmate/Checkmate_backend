@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -89,8 +90,8 @@ public class UserController {
         return ResponseEntity.ok(update);
     }
 
-    @PostMapping("/mypage")
-    public ResponseEntity<Void> updateMyPage(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserDataUpdate update) { // @ModelAttribute 대신 @RequestBody
+    @PutMapping("/mypage")
+    public ResponseEntity<Map<String, Object>> updateMyPage(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserDataUpdate update) { // @ModelAttribute 대신 @RequestBody
         String currentuser = userDetails.getUsername();
         SiteUser user = userRepository.findByUsername(currentuser)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found: " + currentuser));
@@ -100,6 +101,10 @@ public class UserController {
         user.setPhone_number(update.getPhone_number());
         userRepository.save(user);
 
-        return ResponseEntity.ok().build(); // 성공 응답 (body 없음)
+        Map<String, Object> responseBody = new HashMap<>();
+
+        responseBody.put("username", user.getUsername());
+
+        return ResponseEntity.ok(responseBody);
     }
 }
