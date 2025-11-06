@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 import project.project1.user.UserRepository;
 import project.project1.user.UserRole;
 import project.project1.user.jwt.JwtService;
@@ -29,7 +30,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             throws IOException, ServletException {
         log.info("OAuth2 Login 성공!");
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-        response.setContentType("application/json;charset=UTF-8");
 
         String accessToken = jwtService.createAccessToken(oAuth2User.getId(), oAuth2User.getUsername());
         String refreshToken = jwtService.createRefreshToken();
@@ -40,15 +40,20 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         // DB 업데이트 (refreshToken 저장)
         jwtService.updateRefreshToken(oAuth2User.getUsername(), refreshToken);
 
-        // JSON 응답 작성
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("accessToken", accessToken);
-        responseBody.put("refreshToken", refreshToken);
-        responseBody.put("isGuest", isGuest);
+        String frontendBaseUrl = "http://localhost:5173";
+        String targetPath;
+        if (isGuest) {
+            targetPath = "/signup-additional-info"; // 프론트엔드의 추가 정보 입력 페이지
+        } else {
+            targetPath = "/"; // 프론트엔드의 메인 페이지
+        }
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonResponse = objectMapper.writeValueAsString(responseBody);
+        String targetUrl = UriComponentsBuilder.fromUriString(frontendBaseUrl + targetPath)
+                .queryParam("accessToken", accessToken)
+                .queryParam("refreshToken", refreshToken)
+                .build()
+                .toUriString();
 
-        response.getWriter().write(jsonResponse);
+        response.sendRedirect(targetUrl);
     }
 }
