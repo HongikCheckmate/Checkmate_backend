@@ -31,6 +31,7 @@ import project.project1.user.jwt.JwtService;
 import project.project1.user.social.CustomOAuth2UserService;
 import project.project1.user.social.OAuth2LoginFailureHandler;
 import project.project1.user.social.OAuth2LoginSuccessHandler;
+import project.project1.user.social.HttpCookieOAuth2AuthorizationRequestRepository;
 
 import java.util.Arrays;
 
@@ -45,6 +46,7 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -83,6 +85,9 @@ public class SecurityConfig {
 
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/user/login")
+                        .authorizationEndpoint(auth -> auth
+                                .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
+                        )
                 .successHandler(oAuth2LoginSuccessHandler) // 동의하고 계속하기를 눌렀을 때 Handler 설정
                 .failureHandler(oAuth2LoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
                 .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
