@@ -2,6 +2,7 @@ package project.project1.group;
 
 import jakarta.persistence.*;
 import lombok.*;
+import project.project1.CryptoConverter;
 import project.project1.user.SiteUser;
 
 import java.util.HashSet;
@@ -30,6 +31,10 @@ public class Group {
     @Setter
     @Getter
     private String password;
+
+    @Setter
+    @Getter
+    private boolean hidden;
 
     // 그룹의 방장. 한 그룹은 한 명의 방장만 있으므로 ManyToOne 사용.
     @Setter
