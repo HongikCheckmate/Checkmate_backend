@@ -1,8 +1,10 @@
 package project.project1.group;
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import project.project1.group.dto.GroupCreateRequestDto;
 import project.project1.user.SiteUser;
 import project.project1.user.UserRepository;
 
@@ -37,29 +40,43 @@ public class GroupController {
         return "group/create";
     }
 
-    // 그룹 생성 처리
     @PostMapping("/create")
+    public ResponseEntity<?> createGroup(@AuthenticationPrincipal UserDetails userDetails, @RequestBody GroupCreateRequestDto dto) {
+        try{
+            groupService.createGroup(dto);
+            return ResponseEntity.ok("ok");
+        } catch(Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @Deprecated(forRemoval = true)
+    // 그룹 생성 처리
+    //@PostMapping("/create")
     public String createGroup(@AuthenticationPrincipal UserDetails userDetails, @ModelAttribute("groupForm") GroupForm groupForm, BindingResult result) {
         if (result.hasErrors()) {
             return "group/create";
         }
-        groupService.createGroup(
-                groupForm.getName(),
-                groupForm.getDescription(),
-                groupForm.getPassword(),
-                userRepository.findByUsername(userDetails.getUsername()).get().getId()
-        );
+//        groupService.createGroup(
+//                groupForm.getName(),
+//                groupForm.getDescription(),
+//                groupForm.getPassword(),
+//                userRepository.findByUsername(userDetails.getUsername()).get().getId()
+//        );
         return "redirect:/group/list"; // 이후 그룹 목록 페이지로 리디렉션 (추가 개발 필요)
     }
 
     // 그룹 가입 폼 보여주기
-    @GetMapping("/join")
+    // 그룹 검색
+    @Deprecated(forRemoval = true)
+    // @GetMapping("/join")
     public String showJoinForm(Model model) {
         model.addAttribute("joinForm", new GroupJoinForm());
         return "group/join";
     }
-
-    @PostMapping("/join")
+    // 그룹 검색
+    @Deprecated(forRemoval = true)
+    // @PostMapping("/join")
     public String joinGroup(@ModelAttribute("joinForm") GroupJoinForm joinForm,
                             BindingResult result,
                             @AuthenticationPrincipal UserDetails userDetails) {
@@ -78,7 +95,9 @@ public class GroupController {
         return "redirect:/group/list";
     }
 
-    @GetMapping("/list")
+    // 그룹 검색
+    @Deprecated(forRemoval = true)
+    // @GetMapping("/list")
     public String showGroupList(Model model,
                                 @PageableDefault(size = 10) Pageable pageable) {
         Page<Group> groupPage = groupService.searchGroupsByName("", pageable); // 전체 그룹 조회
