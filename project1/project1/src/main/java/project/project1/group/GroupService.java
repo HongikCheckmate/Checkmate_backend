@@ -36,7 +36,7 @@ public class GroupService {
         groupBuilder.description(description);
         groupBuilder.leader(leader);
 
-        if(password.isEmpty() || password.isBlank()){
+        if(password == null || password.isEmpty()){
             groupBuilder.password(null);
         } else {
             groupBuilder.password(passwordEncoder.encode(password));
