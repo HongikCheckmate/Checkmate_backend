@@ -47,9 +47,9 @@ public class SiteUser {
         this.refreshToken = updateRefreshToken; // 리프레시 토큰 재발급
     }
 
-    @OneToOne(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private SolvedAcUser solvedAcUser;
 
-    @OneToOne(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "siteUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private GithubUser githubUser;
 }

@@ -1,7 +1,9 @@
 package project.project1.goal.certification;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.springframework.data.annotation.CreatedDate;
@@ -13,34 +15,34 @@ import project.project1.user.SiteUser;
 
 import java.time.LocalDateTime;
 
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "certification_type")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 @Getter
 @Setter
-public class Certification {
+public abstract class Certification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private SiteUser user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "goal_id")
     private Goal goal;
 
     @Enumerated(EnumType.STRING)
-    private CertificationType type; // TEXT, IMAGE, VIDEO, EXTERNAL
-
-    @Enumerated(EnumType.STRING)
-    private ExternalCertificationMethod method; // SOLVED_AC, GITHUB
-
-    private LocalDateTime certifiedAt;
-
-    private String content; //텍스트 인증시 내용
-    private String contentUrl; // 이미지나 영상 URL
+    @Column(nullable = false)
+    private CertificationStatus status;
 
     @CreatedDate
-    private LocalDateTime createdDate;
+    private LocalDateTime createdDate; //제출시간
+
+    private LocalDateTime certifiedAt; //승인시간
+
 
 }

@@ -43,7 +43,7 @@ public abstract class Goal {
     @Enumerated(EnumType.STRING)
     private ExternalCertificationMethod externalMethod;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     private Group group;
 

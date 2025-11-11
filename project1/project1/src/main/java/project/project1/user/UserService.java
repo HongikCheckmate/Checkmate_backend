@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -50,5 +52,9 @@ public class UserService {
                     log.warn("존재하지 않는 사용자 ID로 조회 시도: {}", userId); // ◀◀ 로그 추가
                     return new IllegalArgumentException("User not found: " + userId);
                 });
+    }
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public Optional<SiteUser> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }
