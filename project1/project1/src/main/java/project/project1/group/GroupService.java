@@ -50,6 +50,8 @@ public class GroupService {
 
     }
 
+
+
     @Deprecated(forRemoval = true)
     // 그룹 생성 (방장(Member)의 ID가 반드시 존재해야 하며, 방장은 그룹 회원 목록에 자동 추가됨)
     public Group createGroup(String name, String description, String password, Long leaderId) {
