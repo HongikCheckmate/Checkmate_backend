@@ -24,6 +24,7 @@ import java.util.Map;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
@@ -54,6 +55,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .build()
                 .toUriString();
 
+        clearAuthenticationAttributes(request, response);
+
         response.sendRedirect(targetUrl);
+
+    }
+    private void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
+        httpCookieOAuth2AuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
     }
 }
