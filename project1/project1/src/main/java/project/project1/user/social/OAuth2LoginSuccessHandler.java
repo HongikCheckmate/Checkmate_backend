@@ -42,16 +42,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         jwtService.updateRefreshToken(oAuth2User.getUsername(), refreshToken);
 
         String frontendBaseUrl = "http://localhost:5173";
-        String targetPath;
-        if (isGuest) {
-            targetPath = "/signup-additional-info"; // 프론트엔드의 추가 정보 입력 페이지
-        } else {
-            targetPath = "/"; // 프론트엔드의 메인 페이지
-        }
+        String targetPath = "/oauth/callback";
 
         String targetUrl = UriComponentsBuilder.fromUriString(frontendBaseUrl + targetPath)
                 .queryParam("accessToken", accessToken)
                 .queryParam("refreshToken", refreshToken)
+                .queryParam("isGuest", isGuest)
                 .build()
                 .toUriString();
 
