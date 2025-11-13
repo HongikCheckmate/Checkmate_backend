@@ -81,7 +81,7 @@ class GroupInviteTest {
         mockMvc.perform(get("/api/invites/" + inviteeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].inviterName").value("A유저"))
-                .andExpect(jsonPath("$[0].groupName").value("테스트 그룹"))
+                .andExpect(jsonPath("$[0].invitedGroupId").value("1"))
                 .andExpect(jsonPath("$[0].status").value("PENDING"));
 
         // 3. B가 초대 수락

@@ -24,6 +24,12 @@ class GroupMemberControllerTest {
     GroupMemberService service;
 
     @MockitoBean
+    GroupRepository groupRepo;
+
+    @MockitoBean
+    GroupService groupService;
+
+    @MockitoBean
     JpaMetamodelMappingContext jpaMappingContext;
 
 
