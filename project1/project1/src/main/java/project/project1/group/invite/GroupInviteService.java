@@ -44,7 +44,7 @@ public class GroupInviteService {
                 .map(invite -> InviteResponseDto.builder()
                         .id(invite.getId())
                         .inviterName(invite.getInviter().getUsername())
-                        .groupName(invite.getGroup().getName())
+                        .invitedGroupId(invite.getGroup().getId())
                         .status(invite.getStatus())
                         .build())
                 .toList();

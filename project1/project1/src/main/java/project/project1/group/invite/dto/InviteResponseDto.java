@@ -10,7 +10,7 @@ import project.project1.group.invite.InviteStatus;
 @Builder
 public class InviteResponseDto {
     private Long id;
+    private Long invitedGroupId;
     private String inviterName;
-    private String groupName;
     private InviteStatus status;
 }
