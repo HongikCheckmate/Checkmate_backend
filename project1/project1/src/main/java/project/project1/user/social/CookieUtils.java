@@ -30,9 +30,9 @@ public class CookieUtils {
                 .path("/")
                 .httpOnly(true)
                 .maxAge(maxAge)
-                .sameSite("Lax") // localhost 개발 환경을 위한 SameSite 설정
-                // .secure(true) // 배포 시(HTTPS)에는 "None"과 함께 이 옵션을 켜야 합니다.
-                // .sameSite("None") // 배포 시(HTTPS) "Lax" 대신 "None"으로 변경
+//                .sameSite("Lax") // localhost 개발 환경을 위한 SameSite 설정
+                 .secure(true) // 배포 시(HTTPS)에는 "None"과 함께 이 옵션을 켜야 합니다.
+                 .sameSite("None") // 배포 시(HTTPS) "Lax" 대신 "None"으로 변경
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
@@ -50,9 +50,9 @@ public class CookieUtils {
                             .path("/")
                             .httpOnly(true)
                             .maxAge(0) // 만료 시간을 0으로 설정
-                            .sameSite("Lax") // 추가 (addCookie와 동일하게)
-                            // .secure(true) // 배포 시(HTTPS) 추가
-                            // .sameSite("None") // 배포 시(HTTPS) 추가
+                            //.sameSite("Lax") // 추가 (addCookie와 동일하게)
+                             .secure(true) // 배포 시(HTTPS) 추가
+                             .sameSite("None") // 배포 시(HTTPS) 추가
                             .build();
 
                     response.addHeader("Set-Cookie", deleteCookie.toString());
