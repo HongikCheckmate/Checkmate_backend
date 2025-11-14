@@ -6,12 +6,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import project.project1.api.dto.GroupSummaryDto;
+import project.project1.exception.ForbiddenException;
 import project.project1.group.dto.GroupCreateRequestDto;
+import project.project1.group.dto.GroupUpdateRequestDto;
+import project.project1.group.member.GroupMemberRepository;
 import project.project1.user.SiteUser;
 import project.project1.user.UserRepository;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +25,61 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
+    private final GroupMemberRepository groupMemberRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Transactional(readOnly = true)
+    public boolean isLeader(Long groupId, String username) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("그룹을 찾을 수 없습니다."));
+        return group.getLeader() != null && group.getLeader().getUsername().equals(username);
+    }
+
+    @Transactional
+    public GroupSummaryDto updateGroup(Long groupId, String actorUsername, GroupUpdateRequestDto req) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("그룹을 찾을 수 없습니다."));
+
+
+        if (group.getLeader() == null || !group.getLeader().getUsername().equals(actorUsername)) {
+            throw new ForbiddenException("그룹장만 수정할 수 있습니다.");
+        }
+
+
+        // 1) 이름 변경
+        if (req.name() != null) {
+            String name = req.name().trim();
+            if (name.isEmpty()) throw new IllegalArgumentException("그룹명은 비어있을 수 없습니다.");
+            group.setName(name);
+        }
+
+
+        // 2) 설명 변경
+        if (req.description() != null) {
+            group.setDescription(req.description().trim());
+        }
+
+
+        // 3) 리더 위임
+        if (req.leader() != null) {
+            Optional<SiteUser> target = userRepository.findByUsername(req.name());
+
+            if(target.isEmpty()) {
+                throw new IllegalArgumentException("해당 그룹원은 없는 유저네임입니다.");
+            }
+
+            if (!groupMemberRepository.existsByGroup_IdAndUser_Username(groupId, req.name())) {
+                throw new IllegalArgumentException("리더는 그룹원에게만 위임할 수 있습니다.");
+            }
+            group.setLeader(target.get());
+        }
+
+
+        Group saved = groupRepository.save(group);
+        return new GroupSummaryDto(
+                saved.getId(), saved.getLeader().getUsername(), saved.getName(), saved.getDescription(), group.getMember().size()
+        );
+    }
 
     public Group createGroup(GroupCreateRequestDto dto){
         SiteUser leader = userRepository.findByUsername(dto.getRoomManager())
@@ -49,6 +108,8 @@ public class GroupService {
         return groupRepository.save(g);
 
     }
+
+
 
     @Deprecated(forRemoval = true)
     // 그룹 생성 (방장(Member)의 ID가 반드시 존재해야 하며, 방장은 그룹 회원 목록에 자동 추가됨)
