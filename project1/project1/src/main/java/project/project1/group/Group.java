@@ -50,7 +50,9 @@ public class Group {
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "member_id")
     )
-    private Set<SiteUser> members;
+
+    @Builder.Default
+    private Set<SiteUser> members = new HashSet<>();
 
     public Set<SiteUser> getMember() {
         return members;
@@ -58,5 +60,14 @@ public class Group {
 
     public void addMember(SiteUser member) {
         members.add(member);
+    }
+
+    @PrePersist
+    private void addLeaderToMembers(){
+        if(leader != null){
+            if(members == null)
+                members = new HashSet<>();
+            members.add(leader);
+        }
     }
 }
