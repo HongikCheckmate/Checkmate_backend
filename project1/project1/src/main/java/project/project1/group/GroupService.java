@@ -134,6 +134,16 @@ public class GroupService {
         groupRepository.save(group);
     }
 
+    // 그룹 가입 (
+    public void joinGroup(Long groupId, String memberUsername) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다. ID=" + groupId));
+        SiteUser member = userRepository.findByUsername(memberUsername)
+                .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다. Username=" + memberUsername));
+        group.addMember(member);
+        groupRepository.save(group);
+    }
+
     @Transactional(readOnly = true)
     public List<Group> findAllGroups() {
         return groupRepository.findAll();
