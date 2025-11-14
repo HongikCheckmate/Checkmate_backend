@@ -18,7 +18,7 @@ public class SolvedAcUser {
     @MapsId // SiteUser의 ID를 SolvedAcUser의 ID로 매핑
     private SiteUser siteUser;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String handle; // 백준 핸들
 
     // 생성자

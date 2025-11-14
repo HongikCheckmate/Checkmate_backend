@@ -8,5 +8,6 @@ public class UserDataUpdate {
     private String nickname;
     private String email;
     private String phone_number;
+    private String handle;
 
 }

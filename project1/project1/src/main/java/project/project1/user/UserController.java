@@ -4,12 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import project.project1.goal.certification.external.solvedac.SolvedAcUser;
+import project.project1.goal.certification.external.solvedac.SolvedAcUserRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +27,7 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final SolvedAcUserRepository solvedAcUserRepository;
 
 
     @PostMapping("/signup")
@@ -87,6 +91,11 @@ public class UserController {
         update.setPhone_number(user.getPhone_number());
         update.setEmail(user.getEmail());
 
+        solvedAcUserRepository.findById(user.getId())
+                .ifPresent(solvedAcUser -> {
+                    update.setHandle(solvedAcUser.getHandle());
+                });
+
         return ResponseEntity.ok(update);
     }
 
@@ -101,10 +110,50 @@ public class UserController {
         user.setPhone_number(update.getPhone_number());
         userRepository.save(user);
 
+        String newHandle = update.getHandle();
         Map<String, Object> responseBody = new HashMap<>();
 
-        responseBody.put("username", user.getUsername());
+        // DTO에 handle 값이 유효하게(null이나 공백이 아닌) 넘어온 경우에만 처리
+        if (newHandle != null && !newHandle.isBlank()) {
+            try {
+                // 기존 SolvedAcUser 정보가 있는지 ID로 확인
+                SolvedAcUser solvedAcUser = solvedAcUserRepository.findById(user.getId())
+                        .orElse(null); // 없으면 null
 
+                if (solvedAcUser != null) {
+                    // 3-1. 기존 정보가 있으면: 핸들 업데이트
+                    solvedAcUser.setHandle(newHandle);
+                    solvedAcUserRepository.save(solvedAcUser);
+                } else {
+                    // 3-2. 기존 정보가 없으면: 새로 생성 (제공된 생성자 활용)
+                    SolvedAcUser newSolvedAcUser = new SolvedAcUser(user, newHandle);
+                    solvedAcUserRepository.save(newSolvedAcUser);
+                }
+                // 응답 본문에 업데이트된 핸들 포함
+                responseBody.put("handle", newHandle);
+
+            } catch (DataIntegrityViolationException e) {
+                // ◀◀ 4. 핸들 'unique = true' 제약조건 위반 시 예외 처리
+                log.warn("핸들 업데이트 실패: 중복된 아이디. User: {}, Handle: {}", currentuser, newHandle, e);
+                responseBody.put("success", false);
+                responseBody.put("error", "이미 사용 중인 백준 계정입니다.");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(responseBody);
+            }
+        } else {
+            // 기존 SolvedAcUser 정보가 있는지 확인
+            solvedAcUserRepository.findById(user.getId())
+                    .ifPresent(solvedAcUser -> {
+                        // 정보가 있으면 엔티티 자체를 삭제
+                        solvedAcUserRepository.delete(solvedAcUser);
+                        log.info("SolvedAcUser 핸들 삭제. User: {}", currentuser);
+                    });
+            // (정보가 없으면 아무것도 하지 않음)
+
+            responseBody.put("handle", null); // ◀◀ 응답에 null을 명시
+        }
+
+        responseBody.put("success", true); // ◀◀ 성공 여부 추가
+        responseBody.put("username", user.getUsername());
         return ResponseEntity.ok(responseBody);
     }
 }
