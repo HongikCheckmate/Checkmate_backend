@@ -2,6 +2,7 @@ package project.project1.user.social;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,8 @@ import project.project1.user.jwt.JwtService;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static project.project1.user.social.HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
 
 @Slf4j
 @Component
@@ -37,12 +40,19 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // 신규 유저 여부 체크
         boolean isGuest = oAuth2User.getRole() == UserRole.GUEST;
+        String frontendBaseUrl = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
+                .map(Cookie::getValue)
+                .orElse(("http://localhost:5173"));
 
         // DB 업데이트 (refreshToken 저장)
         jwtService.updateRefreshToken(oAuth2User.getUsername(), refreshToken);
 
-        String frontendBaseUrl = "http://localhost:5173";
-        String targetPath = "/oauth/callback";
+        String targetPath;
+        if (isGuest) {
+            targetPath = "/oauth-signup-info"; // GUEST는 정보 입력 폼으로
+        } else {
+            targetPath = "/"; // USER는 홈으로
+        }
 
         String targetUrl = UriComponentsBuilder.fromUriString(frontendBaseUrl + targetPath)
                 .queryParam("accessToken", accessToken)

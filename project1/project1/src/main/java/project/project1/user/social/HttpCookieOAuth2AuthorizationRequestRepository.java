@@ -13,7 +13,7 @@ public class HttpCookieOAuth2AuthorizationRequestRepository implements Authoriza
     public static final String OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME = "oauth2_auth_request";
 
     // 이 쿠키는 인증이 끝난 후 리다이렉트할 최종 목적지(프론트 주소)를 담습니다.
-    public static final String REDIRECT_URI_PARAM_COOKIE_NAME = "redirect_uri";
+    public static final String REDIRECT_URI_PARAM_COOKIE_NAME = "https://checkmate.kimbepo.xyz";
 
     // 쿠키 만료 시간 (로그인 프로세스 중에만 유효하도록 짧게 설정)
     private static final int COOKIE_EXPIRE_SECONDS = 180; // 3분
