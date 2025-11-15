@@ -9,6 +9,7 @@ import project.project1.goal.certification.external.ExternalCertificationMethod;
 import project.project1.goal.certification.external.ProblemGoalType;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Getter
@@ -30,9 +31,7 @@ public class GoalCreateRequestDto {
     private ProblemGoalType problemGoalType;
     private Integer problemCount;
 
-    // (참고) SPECIFIC 모드일 때, 폼에서 "1001,1002,1003" 처럼
-    // 쉼표로 구분된 문자열로 문제 ID를 받는다고 가정합니다.
-    private String targetProblemIds;
+    private List<Integer> targetProblems;
 
     // --- GitHub 전용 필드 ---
     private String targetRepository;
