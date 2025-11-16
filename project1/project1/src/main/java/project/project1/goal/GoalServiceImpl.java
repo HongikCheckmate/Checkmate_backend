@@ -3,8 +3,6 @@ package project.project1.goal;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import project.project1.goal.certification.CertificationType;
-import project.project1.goal.certification.external.ExternalCertificationMethod;
 import project.project1.goal.certification.external.ProblemGoalType;
 import project.project1.goal.certification.external.github.GithubGoal;
 import project.project1.goal.certification.external.solvedac.SolvedAcGoal;
@@ -15,8 +13,6 @@ import project.project1.goal.certification.storage.VideoGoal;
 import project.project1.group.Group;
 import project.project1.group.GroupRepository;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;

@@ -5,12 +5,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.codehaus.groovy.transform.GroovyASTTransformation;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import project.project1.goal.Goal;
-import project.project1.goal.certification.external.ExternalCertificationMethod;
-import project.project1.group.Group;
 import project.project1.user.SiteUser;
 
 import java.time.LocalDateTime;

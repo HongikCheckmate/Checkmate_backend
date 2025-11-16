@@ -2,12 +2,16 @@ package project.project1.goal;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 
 import java.util.List;
 
 @Data
-@AllArgsConstructor
+@Getter
 public class GoalPageResponse { //응답 DTO
-    private List<Goal> goals;
-    private List<String> certificationTypes;
+    private List<GoalListDto> goals;
+
+    public GoalPageResponse(List<GoalListDto> goals) {
+        this.goals = goals;
+    }
 }

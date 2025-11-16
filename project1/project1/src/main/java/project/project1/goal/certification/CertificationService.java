@@ -1,7 +1,6 @@
 package project.project1.goal.certification;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +21,6 @@ import project.project1.goal.certification.storage.TextGoal;
 import project.project1.goal.certification.storage.VideoGoal;
 import project.project1.group.Group;
 import project.project1.user.SiteUser;
-import project.project1.user.UserRepository;
 import project.project1.user.UserService;
 
 import java.time.LocalDate;

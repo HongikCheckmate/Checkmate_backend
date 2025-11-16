@@ -79,8 +79,8 @@ public class SecurityConfig {
                                 .requestMatchers("/api/user/signup", "/user/signup").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/v3/**", "/h2-console/**").permitAll()
                                 .requestMatchers("/api/oauth2/sign-up").hasRole("GUEST")
-                                .anyRequest().permitAll() //모든 접속 허용
-//                                .anyRequest().authenticated()
+//                                .anyRequest().permitAll() //모든 접속 허용
+                                .anyRequest().authenticated()
                 )
 
                 .oauth2Login(oauth2 -> oauth2

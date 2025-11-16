@@ -2,12 +2,10 @@ package project.project1.goal;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.DiscriminatorFormula;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import project.project1.goal.certification.CertificationType;
 import project.project1.goal.certification.external.ExternalCertificationMethod;
-import project.project1.goal.certification.external.solvedac.SolvedAcGoalMember;
 import project.project1.group.Group;
 
 import java.time.LocalDate;

@@ -18,7 +18,9 @@ import project.project1.goal.certification.storage.ImageGoal;
 import project.project1.goal.certification.storage.TextGoal;
 import project.project1.goal.certification.storage.VideoGoal;
 import project.project1.group.Group;
+import project.project1.group.GroupRepository;
 import project.project1.group.GroupService;
+import project.project1.group.member.GroupMemberRepository;
 import project.project1.user.CustomUserDetails;
 import project.project1.user.UserService;
 
@@ -36,6 +38,8 @@ public class GoalController {
 
     private final GoalService goalService;
     private final GroupService groupService;
+    private final GroupRepository groupRepository;
+    private final GroupMemberRepository groupMemberRepository;
 
     /**
      * 새로운 목표를 JSON으로 받아 생성합니다.
@@ -43,20 +47,15 @@ public class GoalController {
     @PostMapping
     public ResponseEntity<GoalResponseDto> createGoal(
             @RequestBody GoalCreateRequestDto requestDto,
-            // ◀◀ 2. (오류 2 수정) @AuthenticationPrincipal로 사용자 정보 주입
-            // (참고: 만약 표준 UserDetails를 쓴다면, ID를 가져오기 위해 userService로 SiteUser를 조회해야 함)
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
 
-        // ◀◀ 3. (오류 3 수정) 'dto' -> 'requestDto'로 변수명 통일
         log.info("===== Goal Create Request DTO 수신: {} =====", requestDto.toString());
 
-        // ◀◀ 2. userDetails에서 ID 가져오기
         Long managerId = userDetails.getId();
         Group group = groupService.findById(requestDto.getGroupId()); // ◀◀ 'requestDto' 사용
 
         if (!group.getLeader().getId().equals(managerId)) {
-            // 권한이 없는 경우 403 Forbidden 응답
             log.warn("목표 생성 권한 없음. GroupId: {}, UserId: {}", requestDto.getGroupId(), managerId);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -66,7 +65,6 @@ public class GoalController {
 
         // 2. 엔티티를 DTO로 변환하여 반환합니다.
         GoalResponseDto responseDto = new GoalResponseDto(savedGoal);
-        // ◀◀ 1. (오류 1 해결) CREATED(201) 상태와 responseDto 반환
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
@@ -75,12 +73,42 @@ public class GoalController {
      * (기존 GoalController의 getGoalPage 메서드를 이동)
      */
     @GetMapping("/group/{groupId}")
-    public GoalPageResponse getGoalPage(@PathVariable Long groupId) {
-        List<Goal> goals = goalService.getGoalsByGroupId(groupId);
-        List<String> certificationTypes = Arrays.stream(CertificationType.values())
-                .map(Enum::name)
+    public ResponseEntity<?> getGoalPage(@PathVariable("groupId") Long groupId,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long currentUserId = userDetails.getId();
+        String currentUsername = userDetails.getUsername();
+
+        boolean isMember = groupMemberRepository.existsByGroup_IdAndUser_Username(groupId, currentUsername);
+
+        // 2. GroupRepository에서 Group을 직접 조회하여 리더인지 확인
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("그룹을 찾을 수 없습니다."));
+
+        boolean isLeader = group.getLeader() != null && group.getLeader().getId().equals(currentUserId);
+
+        // 3. ◀ 멤버도 아니고 리더도 아니면 403 반환
+        if (!isMember && !isLeader) {
+            log.warn("목표 목록 조회 권한 없음. GroupId: {}, UserId: {}", groupId, currentUserId);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("이 그룹의 목표를 볼 권한이 없습니다.");
+        }
+
+        List<Goal> goalEntities = goalService.getGoalsByGroupId(groupId);
+
+        List<GoalListDto> goalDtos = goalEntities.stream()
+                .map(goal -> GoalListDto.builder() // ◀ 빌더 시작
+                        .id(goal.getId())
+                        .name(goal.getName())
+                        .endDate(goal.getEndDate())
+                        .certificationType(goal.getCertificationType())
+                        .externalMethod(goal.getExternalMethod())
+                        .groupId(goal.getGroup() != null ? goal.getGroup().getId() : null)
+                        .cycle(goal.getCycle())
+                        .createdDate(goal.getCreatedDate())
+                        .build() // ◀ 빌더 종료
+                )
                 .collect(Collectors.toList());
 
-        return new GoalPageResponse(goals, certificationTypes);
+        return ResponseEntity.ok(new GoalPageResponse(goalDtos));
     }
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import project.project1.goal.Goal;
 import project.project1.goal.certification.CertificationType;
