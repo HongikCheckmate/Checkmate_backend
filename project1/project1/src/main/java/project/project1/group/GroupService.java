@@ -77,7 +77,7 @@ public class GroupService {
 
         Group saved = groupRepository.save(group);
         return new GroupSummaryDto(
-                saved.getId(), saved.getLeader().getUsername(), saved.getName(), saved.getDescription(), group.getMember().size()
+                saved.getId(), saved.getLeader().getUsername(), saved.getLeader().getNickname(), saved.getName(), saved.getDescription(), group.getMember().size()
         );
     }
 

@@ -47,10 +47,11 @@ public class CommonGroupAPIController {
         // DTO 매핑
         Page<GroupSummaryDto> dtoPage = groups.map(g -> new GroupSummaryDto(
                 g.getId(),
+                g.getLeader().getUsername(),
                 g.getLeader().getNickname(),
                 g.getName(),
                 g.getDescription(),
-                g.getMember() != null ? g.getMember().size() : 0
+                g.getMember().size()
         ));
 
         return ResponseEntity.ok(dtoPage);

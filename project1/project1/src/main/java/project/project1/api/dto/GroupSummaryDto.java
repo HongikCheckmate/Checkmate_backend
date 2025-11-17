@@ -10,6 +10,7 @@ import lombok.Setter;
 public class GroupSummaryDto {
 
     private long id;
+    private String leaderUsername;
     private String leaderNickname;
     private String name;
     private String description;

@@ -34,13 +34,18 @@ public class GroupManageAPIController {
             @PathVariable Long groupId
     ){
 
-        Optional<Group> g = groupRepository.findById(groupId);
+        Optional<Group> groupOptional = groupRepository.findById(groupId);
 
-        if(g.isPresent()){
-            return new ResponseEntity<>(g.get(), HttpStatus.OK);
-        } else {
+        if(groupOptional.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
+        Group g = groupOptional.get();
+
+        GroupSummaryDto groupSummaryDto = new GroupSummaryDto(
+                g.getId(), g.getLeader().getUsername(), g.getLeader().getNickname(), g.getName(), g.getDescription(), g.getMember().size()
+        );
+
+        return new ResponseEntity<>(groupSummaryDto, HttpStatus.OK);
     }
 
     @PatchMapping("/{groupId}")
