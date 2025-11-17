@@ -104,7 +104,7 @@ public class GoalController {
                         .externalMethod(goal.getExternalMethod())
                         .groupId(goal.getGroup() != null ? goal.getGroup().getId() : null)
                         .cycle(goal.getCycle())
-                        .createdDate(goal.getCreatedDate())
+                        .createdDate(goal.getCreatedDate().toLocalDate())
                         .build() // ◀ 빌더 종료
                 )
                 .collect(Collectors.toList());

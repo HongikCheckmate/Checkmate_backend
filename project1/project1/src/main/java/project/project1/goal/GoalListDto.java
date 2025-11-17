@@ -18,7 +18,7 @@ public class GoalListDto {
     private ExternalCertificationMethod externalMethod;
     private Long groupId;
     private int cycle;
-    private LocalDateTime createdDate;
+    private LocalDate createdDate;
 
         // (만약 SolvedAcGoal의 problemGoalType도 목록에 필요하다면
         //  instanceof로 확인해서 DTO 필드에 추가할 수 있습니다.)
