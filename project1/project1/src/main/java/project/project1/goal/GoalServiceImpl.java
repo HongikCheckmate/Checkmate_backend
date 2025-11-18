@@ -2,28 +2,33 @@ package project.project1.goal;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import project.project1.goal.certification.external.ProblemGoalType;
 import project.project1.goal.certification.external.github.GithubGoal;
-import project.project1.goal.certification.external.solvedac.SolvedAcGoal;
-import project.project1.goal.certification.external.solvedac.TargetProblem;
+import project.project1.goal.certification.external.solvedac.*;
 import project.project1.goal.certification.storage.ImageGoal;
 import project.project1.goal.certification.storage.TextGoal;
 import project.project1.goal.certification.storage.VideoGoal;
 import project.project1.group.Group;
 import project.project1.group.GroupRepository;
+import project.project1.group.member.GroupMember;
+import project.project1.user.SiteUser;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @org.springframework.transaction.annotation.Transactional(readOnly = true)
 public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
-    private final GroupRepository groupRepository;
+    private final SolvedAcUserRepository solvedAcUserRepository;
+    private final SolvedAcClient solvedAcClient;
 
     @Transactional
     @Override
@@ -47,6 +52,7 @@ public class GoalServiceImpl implements GoalService {
                         solvedAcGoal.setProblemGoalType(dto.getProblemGoalType());
                         if (dto.getProblemGoalType() == ProblemGoalType.COUNT) {
                             solvedAcGoal.setProblemCount(dto.getProblemCount());
+                            addMembersToCountGoal(solvedAcGoal, group.getMember());
 
                         } else if (dto.getProblemGoalType() == ProblemGoalType.SPECIFIC) {
 
@@ -91,6 +97,27 @@ public class GoalServiceImpl implements GoalService {
 
         // ◀◀ 3. (추가) 엔티티를 DB에 저장
         return goalRepository.save(goal);
+    }
+
+    private void addMembersToCountGoal(SolvedAcGoal goal, Set<SiteUser> groupMembers) {
+
+        for (SiteUser user : groupMembers) {
+            SolvedAcUser solvedAcUser = solvedAcUserRepository.findById(user.getId()).orElse(null);
+
+            if (solvedAcUser == null || solvedAcUser.getHandle() == null) {
+                log.warn("Solved.ac 핸들이 없는 유저(ID: {})는 COUNT 목표에 추가되지 않습니다.", user.getId());
+                continue;
+            }
+
+            int startCount = solvedAcClient.getSolvedCount(solvedAcUser.getHandle());
+
+            SolvedAcGoalMember goalMember = new SolvedAcGoalMember();
+            goalMember.setUser(user);
+            goalMember.setGoal(goal);
+            goalMember.setStartCount(startCount);
+
+            goal.getMembers().add(goalMember);
+        }
     }
 
     @Override
