@@ -19,4 +19,6 @@ public interface UserRepository extends JpaRepository<SiteUser, Long> {
     // 소셜아이디와 타입으로 회원검색 가능
 
     Page<SiteUser> findByNicknameContainingIgnoreCase(String nickname, Pageable pageable);
+    Page<SiteUser> findByUsernameContainingIgnoreCase(String username, Pageable pageable);
+    Page<SiteUser> findByNicknameAndUsernameContainingIgnoreCase(String nickname, String username, Pageable pageable);
 }

@@ -6,7 +6,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import project.project1.group.dto.MemberSummaryDto;
+import project.project1.group.dto.GroupMemberSummaryDto;
+import project.project1.group.dto.GroupMemberSummaryDto;
 import project.project1.group.dto.MembersResponseDto;
 import project.project1.util.QueryParamParser;
 
@@ -37,8 +38,8 @@ public class GroupMemberService {
         }
 
 
-        List<MemberSummaryDto> users = result.getContent().stream()
-                .map(m -> new MemberSummaryDto(
+        List<GroupMemberSummaryDto> users = result.getContent().stream()
+                .map(m -> new GroupMemberSummaryDto(
                         m.getUser().getId(),
                         m.getUser().getUsername(),
                         m.getUser().getNickname(),
