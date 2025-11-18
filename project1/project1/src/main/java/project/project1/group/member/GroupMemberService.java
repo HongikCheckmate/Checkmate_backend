@@ -23,6 +23,10 @@ public class GroupMemberService {
         return groupMemberRepository.existsByGroup_IdAndUser_Username(groupId, username);
     }
 
+    public boolean isMember(Long groupId, Long userId){
+        return groupMemberRepository.existsByGroup_IdAndUser_Id(groupId, userId);
+    }
+
 
     public MembersResponseDto listMembers(Long groupId, String query, String sort, boolean reverse, int page) {
         Sort s = buildSort(sort, reverse);

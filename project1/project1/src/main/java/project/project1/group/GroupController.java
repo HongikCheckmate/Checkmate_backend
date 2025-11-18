@@ -57,16 +57,6 @@ public class GroupController {
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 
-    // 그룹 생성 폼 보여주기
-    @GetMapping("/create")
-    public String showCreateForm(Model model) {
-        model.addAttribute("groupForm", new GroupForm());
-
-        // 방장 선택을 위해 모든 회원 목록을 전달 (테스트용)
-        model.addAttribute("members", userRepository.findAll());
-        return "group/create";
-    }
-
     @PostMapping("/create")
     public ResponseEntity<?> createGroup(@AuthenticationPrincipal UserDetails userDetails, @RequestBody GroupCreateRequestDto dto) {
         try{

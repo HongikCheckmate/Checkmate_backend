@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import project.project1.api.dto.GroupSummaryDto;
 import project.project1.group.Group;
 import project.project1.group.GroupRepository;
-import project.project1.user.SiteUser;
 import project.project1.util.QueryParamParser;
 
 @Tag(name = "Common Group API", description = "전체 그룹 관련 API")
@@ -51,7 +50,7 @@ public class CommonGroupAPIController {
                 g.getLeader().getNickname(),
                 g.getName(),
                 g.getDescription(),
-                g.getMember().size()
+                g.getGroupMembers().size()
         ));
 
         return ResponseEntity.ok(dtoPage);

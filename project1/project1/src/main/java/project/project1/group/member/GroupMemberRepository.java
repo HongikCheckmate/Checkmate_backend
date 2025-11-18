@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> {
     boolean existsByGroup_IdAndUser_Username(Long groupId, String username);
+    boolean existsByGroup_IdAndUser_Id(Long groupId, Long userId);
     Page<GroupMember> findByGroup_Id(Long groupId, Pageable pageable);
     Page<GroupMember> findByGroup_IdAndUser_NicknameContainingIgnoreCase(Long groupId, String nickname, Pageable pageable);
 }
