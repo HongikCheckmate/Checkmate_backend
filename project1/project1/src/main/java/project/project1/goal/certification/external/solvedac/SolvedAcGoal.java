@@ -52,4 +52,7 @@ public class SolvedAcGoal extends Goal {
                 })
                 .orElseThrow(() -> new IllegalStateException("해당 유저는 목표(" + this.getName() + ")에 참여하고 있지 않습니다."));
     }
+    public void addGoalMember(SolvedAcGoalMember member) {
+        super.addMember(member);
+    }
 }

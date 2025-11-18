@@ -52,7 +52,11 @@ public class GoalServiceImpl implements GoalService {
                         solvedAcGoal.setProblemGoalType(dto.getProblemGoalType());
                         if (dto.getProblemGoalType() == ProblemGoalType.COUNT) {
                             solvedAcGoal.setProblemCount(dto.getProblemCount());
-                            addMembersToCountGoal(solvedAcGoal, group.getMember());
+                            Set<SiteUser> siteUsers = group.getGroupMembers().stream()
+                                    .map(GroupMember::getUser)
+                                    .collect(Collectors.toSet());
+
+                            addMembersToCountGoal(solvedAcGoal, siteUsers);
 
                         } else if (dto.getProblemGoalType() == ProblemGoalType.SPECIFIC) {
 
@@ -113,10 +117,9 @@ public class GoalServiceImpl implements GoalService {
 
             SolvedAcGoalMember goalMember = new SolvedAcGoalMember();
             goalMember.setUser(user);
-            goalMember.setGoal(goal);
             goalMember.setStartCount(startCount);
 
-            goal.getMembers().add(goalMember);
+            goal.addGoalMember(goalMember);
         }
     }
 

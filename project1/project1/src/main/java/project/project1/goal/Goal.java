@@ -61,4 +61,8 @@ public abstract class Goal {
         this.certificationType = type;
         this.externalMethod = method;
     }
+    public void addMember(GoalMember member) {
+        this.members.add(member);
+        member.setGoal(this);
+    }
 }
