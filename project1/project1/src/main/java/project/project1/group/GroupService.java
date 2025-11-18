@@ -10,10 +10,12 @@ import project.project1.api.dto.GroupSummaryDto;
 import project.project1.exception.ForbiddenException;
 import project.project1.group.dto.GroupCreateRequestDto;
 import project.project1.group.dto.GroupUpdateRequestDto;
+import project.project1.group.member.GroupMember;
 import project.project1.group.member.GroupMemberRepository;
 import project.project1.user.SiteUser;
 import project.project1.user.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -77,7 +79,7 @@ public class GroupService {
 
         Group saved = groupRepository.save(group);
         return new GroupSummaryDto(
-                saved.getId(), saved.getLeader().getUsername(), saved.getName(), saved.getDescription(), group.getMember().size()
+                saved.getId(), saved.getLeader().getUsername(), saved.getLeader().getNickname(), saved.getName(), saved.getDescription(), group.getGroupMembers().size()
         );
     }
 
@@ -104,49 +106,28 @@ public class GroupService {
         groupBuilder.hidden(hidden);
 
         Group g = groupBuilder.build();
+        g.addMember(leader);
 
         return groupRepository.save(g);
-
     }
 
-
-
-    @Deprecated(forRemoval = true)
-    // 그룹 생성 (방장(Member)의 ID가 반드시 존재해야 하며, 방장은 그룹 회원 목록에 자동 추가됨)
-    public Group createGroup(String name, String description, String password, Long leaderId) {
-        SiteUser leader = userRepository.findById(leaderId)
-                .orElseThrow(() -> new NoSuchElementException("리더 회원이 존재하지 않습니다. ID=" + leaderId));
-        Group group = Group.builder()
-                .name(name)
-                .password(password)
-                .leader(leader)
-                .build();
-        return groupRepository.save(group);
-    }
-
-    // 그룹 가입 (회원이 그룹에 가입)
-    public void joinGroup(Long groupId, Long memberId) {
+    public void addUserToGroup(Long groupId, Long userId) {
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다. ID=" + groupId));
-        SiteUser member = userRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다. ID=" + memberId));
-        group.addMember(member);
-        groupRepository.save(group);
-    }
+                .orElseThrow(() -> new IllegalArgumentException("그룹 없음"));
 
-    // 그룹 가입 (
-    public void joinGroup(Long groupId, String memberUsername) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new NoSuchElementException("그룹이 존재하지 않습니다. ID=" + groupId));
-        SiteUser member = userRepository.findByUsername(memberUsername)
-                .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다. Username=" + memberUsername));
-        group.addMember(member);
-        groupRepository.save(group);
-    }
+        SiteUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
 
-    @Transactional(readOnly = true)
-    public List<Group> findAllGroups() {
-        return groupRepository.findAll();
+        // 이미 멤버인지 체크
+        boolean alreadyExists = groupMemberRepository.existsByGroup_IdAndUser_Id(groupId, userId);
+
+        if (alreadyExists) {
+            throw new IllegalStateException("이미 그룹 가입된 유저");
+        }
+
+        group.addMember(user);
+
+        groupRepository.save(group);
     }
 
     public Group findById(Long groupId) {

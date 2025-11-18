@@ -2,7 +2,6 @@ package project.project1.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,13 +33,18 @@ public class GroupManageAPIController {
             @PathVariable Long groupId
     ){
 
-        Optional<Group> g = groupRepository.findById(groupId);
+        Optional<Group> groupOptional = groupRepository.findById(groupId);
 
-        if(g.isPresent()){
-            return new ResponseEntity<>(g.get(), HttpStatus.OK);
-        } else {
+        if(groupOptional.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
+        Group g = groupOptional.get();
+
+        GroupSummaryDto groupSummaryDto = new GroupSummaryDto(
+                g.getId(), g.getLeader().getUsername(), g.getLeader().getNickname(), g.getName(), g.getDescription(), g.getGroupMembers().size()
+        );
+
+        return new ResponseEntity<>(groupSummaryDto, HttpStatus.OK);
     }
 
     @PatchMapping("/{groupId}")
@@ -54,16 +58,29 @@ public class GroupManageAPIController {
         return ResponseEntity.ok(dto);
     }
 
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<?> delete(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable Long groupId
+    ){
+        if (principal == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-    @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<?> handleForbidden(ForbiddenException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-    }
+        Optional<Group> group = groupRepository.findById(groupId);
+        if(group.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
+        Group g = group.get();
+        if(!g.getLeader().getUsername().equals(principal.getUsername())){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } else if(g.getGroupMembers().size() > 1) {
+            return handleBadRequest(new IllegalArgumentException("그룹장을 제외한 멤버가 없어야 그룹을 삭제할 수 있습니다."));
+        } else{
+            // TODO : 그룹을 제거할 때, 그룹에 유저가 없어야하므로, 방장도 그룹에서 탈퇴처리
+            groupRepository.deleteById(groupId);
+            return ResponseEntity.ok().build();
+        }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleBadRequest(IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
 
@@ -84,5 +101,56 @@ public class GroupManageAPIController {
         }
         MembersResponseDto body = groupMemberService.listMembers(groupId, query, sort, reverse, page);
         return ResponseEntity.ok(body);
+    }
+
+    @DeleteMapping("/{groupId}/members/{username}")
+    public ResponseEntity<?> deleteMember(
+            @AuthenticationPrincipal UserDetails principal,
+            @PathVariable Long groupId,
+            @PathVariable String username,
+            @RequestParam(required = false) String reason
+    ){
+        Optional<Group> group = groupRepository.findById(groupId);
+        if(group.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Group g = group.get();
+
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        boolean isLeader = g.getLeader().getUsername().equals(principal.getUsername());
+
+        if(username.equals(principal.getUsername())){
+            if(isLeader){
+                return handleBadRequest(new IllegalArgumentException("그룹장은 탈퇴할 수 없습니다. 그룹장을 위임하거나, 그룹 삭제 기능을 이용해주세요."));
+            } else {
+                // TODO : 본인 탈퇴 처리
+                // groupMemberService.removeMemberFromGroup(groupId, username);
+            }
+
+        } else {
+            if(isLeader){
+                // TODO : username 강퇴 처리
+                // groupMemberService.removeMemberFromGroup(groupId, username);
+            } else {
+                return handleForbidden(new ForbiddenException("강제 퇴장은 그룹장만 가능합니다."));
+            }
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<?> handleForbidden(ForbiddenException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
+
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<?> handleBadRequest(IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 }

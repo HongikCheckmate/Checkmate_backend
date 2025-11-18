@@ -4,5 +4,5 @@ import java.util.List;
 
 public record MembersResponseDto(
         long size,
-        List<MemberSummaryDto> users
+        List<GroupMemberSummaryDto> users
 ) {}

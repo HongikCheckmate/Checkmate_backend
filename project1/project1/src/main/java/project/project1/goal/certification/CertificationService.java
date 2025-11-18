@@ -207,8 +207,8 @@ public class CertificationService {
             throw new IllegalStateException("목표에 연결된 그룹이 없습니다.");
         }
 
-        boolean isMember = group.getMember().stream()
-                .anyMatch(member -> member.getId().equals(currentUserId));
+        boolean isMember = group.getGroupMembers().stream()
+                .anyMatch(member -> member.getUser().getId().equals(currentUserId));
         boolean isManager = goal.getManagerId().equals(currentUserId);
         if (!isMember && !isManager) {
             throw new AccessDeniedException("이 그룹의 멤버가 아닙니다.");

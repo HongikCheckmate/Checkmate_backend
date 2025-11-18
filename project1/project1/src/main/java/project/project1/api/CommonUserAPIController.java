@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import project.project1.api.dto.UserSummaryDto;
 import project.project1.user.SiteUser;
 import project.project1.user.UserRepository;
 
@@ -22,24 +23,29 @@ public class CommonUserAPIController {
 
     private final UserRepository userRepository;
 
-    @Operation(summary = "유저 닉네임 목록 조회",
-                    description = "유저의 닉네임 목록을 반환합니다. 검색어 필터링이 가능합니다.")
+    @Operation(summary = "유저 검색",
+                    description = "유저 목록을 반환합니다. 닉네임/유저네임 필터링이 가능합니다.")
     @GetMapping("/search")
-    public ResponseEntity<Page<String>> getPagedNicknames(
-            @Parameter(description = "닉네임 검색 키워드(부분 일치)") @RequestParam(required = false) String query,
+    public ResponseEntity<Page<UserSummaryDto>> getPagedNicknames(
+            @RequestParam(required = false) String nickname,
+            @RequestParam(required = false) String username,
             @Parameter(hidden = true) Pageable pageable)
     {
-        Page<String> nicknamePage;
+        Page<SiteUser> siteUserPage;
 
-        if (query != null && !query.isEmpty()) {
-            nicknamePage = userRepository.findByNicknameContainingIgnoreCase(query, pageable)
-                    .map(SiteUser::getNickname);
+        if(nickname != null && username != null){
+            siteUserPage = userRepository.findByNicknameAndUsernameContainingIgnoreCase(nickname, username, pageable);
+        } else if(nickname != null){
+            siteUserPage = userRepository.findByNicknameContainingIgnoreCase(nickname, pageable);
+        } else if(username != null){
+            siteUserPage = userRepository.findByUsernameContainingIgnoreCase(username, pageable);
         } else {
-            nicknamePage = userRepository.findAll(pageable)
-                    .map(SiteUser::getNickname);
+            siteUserPage = userRepository.findAll(pageable);
         }
 
-        return ResponseEntity.ok(nicknamePage);
+        Page<UserSummaryDto> userSummaryPage = siteUserPage.map(siteUser -> new UserSummaryDto(siteUser.getId(), siteUser.getUsername(), siteUser.getNickname()));
+
+        return ResponseEntity.ok(userSummaryPage);
     }
 
 }

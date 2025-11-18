@@ -2,7 +2,7 @@ package project.project1.group.dto;
 
 import java.time.LocalDateTime;
 
-public record MemberSummaryDto(
+public record GroupMemberSummaryDto(
         Long id,
         String username,
         String nickname,

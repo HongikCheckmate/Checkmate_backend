@@ -1,5 +1,6 @@
 package project.project1.group.member;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import project.project1.group.Group;
@@ -13,8 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "group_member",
-        uniqueConstraints = @UniqueConstraint(name = "uk_group_user", columnNames = {"group_id","user_id"}))
+@Table(name = "group_member")
 public class GroupMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +22,7 @@ public class GroupMember {
 
 
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "group_id", nullable = false)
+    @JsonIgnore
     private Group group;
 
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "user_id", nullable = false)
