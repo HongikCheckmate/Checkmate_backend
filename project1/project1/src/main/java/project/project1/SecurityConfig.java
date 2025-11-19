@@ -80,6 +80,8 @@ public class SecurityConfig {
                                 .requestMatchers("/user/login").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/v3/**", "/h2-console/**").permitAll()
                                 .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                                .requestMatchers("/api/group/**").permitAll()
+                                .requestMatchers("/api/user/**").permitAll()
                                 .requestMatchers("/api/oauth2/sign-up").hasRole("GUEST")
                                 //.anyRequest().permitAll() //모든 접속 허용
                                 .anyRequest().authenticated()
