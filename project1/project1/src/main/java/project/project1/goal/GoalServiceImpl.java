@@ -52,11 +52,7 @@ public class GoalServiceImpl implements GoalService {
                         solvedAcGoal.setProblemGoalType(dto.getProblemGoalType());
                         if (dto.getProblemGoalType() == ProblemGoalType.COUNT) {
                             solvedAcGoal.setProblemCount(dto.getProblemCount());
-                            Set<SiteUser> siteUsers = group.getGroupMembers().stream()
-                                    .map(GroupMember::getUser)
-                                    .collect(Collectors.toSet());
-
-                            addMembersToCountGoal(solvedAcGoal, siteUsers);
+                            addMembersToCountGoal(solvedAcGoal, group.getGroupMembers());
 
                         } else if (dto.getProblemGoalType() == ProblemGoalType.SPECIFIC) {
 
@@ -103,9 +99,11 @@ public class GoalServiceImpl implements GoalService {
         return goalRepository.save(goal);
     }
 
-    private void addMembersToCountGoal(SolvedAcGoal goal, Set<SiteUser> groupMembers) {
+    private void addMembersToCountGoal(SolvedAcGoal goal, Set<GroupMember> groupMembers) {
 
-        for (SiteUser user : groupMembers) {
+        for (GroupMember gm : groupMembers) {
+            SiteUser user = gm.getUser();
+
             SolvedAcUser solvedAcUser = solvedAcUserRepository.findById(user.getId()).orElse(null);
 
             if (solvedAcUser == null || solvedAcUser.getHandle() == null) {
@@ -117,9 +115,11 @@ public class GoalServiceImpl implements GoalService {
 
             SolvedAcGoalMember goalMember = new SolvedAcGoalMember();
             goalMember.setUser(user);
+            goalMember.setGoal(goal);
             goalMember.setStartCount(startCount);
 
-            goal.addGoalMember(goalMember);
+            // 4. 추가
+            goal.getMembers().add(goalMember);
         }
     }
 
