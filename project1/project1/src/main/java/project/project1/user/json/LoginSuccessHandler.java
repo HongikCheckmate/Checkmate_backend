@@ -53,6 +53,8 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler  
         responseData.put("accessToken", accessToken);
         responseData.put("refreshToken", refreshToken);
         responseData.put("nickname", siteuser.getNickname());
+        responseData.put("id", siteuser.getId());
+        responseData.put("username", siteuser.getUsername());
         objectMapper.writeValue(response.getWriter(), responseData);
 
         log.info("로그인에 성공하였습니다. 아이디 : {}", username);
