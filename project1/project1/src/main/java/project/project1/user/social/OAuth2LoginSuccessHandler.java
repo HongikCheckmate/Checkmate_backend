@@ -43,7 +43,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         boolean isGuest = oAuth2User.getRole() == UserRole.GUEST;
         String frontendBaseUrl = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
                 .map(cookie -> CookieUtils.normalizeRedirectUri(cookie.getValue()))
-                .orElse((frontendUrl));
+                .orElse(CookieUtils.normalizeRedirectUri(frontendUrl));
 
         // DB 업데이트 (refreshToken 저장)
         jwtService.updateRefreshToken(oAuth2User.getUsername(), refreshToken);
