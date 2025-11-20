@@ -29,9 +29,17 @@ public class CustomAuthorizationRequestRepository implements AuthorizationReques
 
         if (authorizationRequest == null) {
             deleteCookie(request, response, COOKIE_NAME);
+            deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
             return;
         }
 
+        // 요청에서 redirect_uri 파라미터 추출
+        String redirectUriAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
+        if (redirectUriAfterLogin != null) {
+            CookieUtils.addCookie(response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUriAfterLogin, 180);
+        }
+
+        // 기존 OAuth2AuthorizationRequest 저장
         String value = serialize(authorizationRequest);
         CookieUtils.addCookie(response, COOKIE_NAME, value, 180);
     }
@@ -41,6 +49,7 @@ public class CustomAuthorizationRequestRepository implements AuthorizationReques
                                                                  HttpServletResponse response) {
         OAuth2AuthorizationRequest requestData = loadAuthorizationRequest(request);
         deleteCookie(request, response, COOKIE_NAME);
+        deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
         return requestData;
     }
 
