@@ -80,7 +80,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/user/signup", "/user/signup").permitAll()
                                 .requestMatchers("/user/login").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/v3/**", "/h2-console/**").permitAll()
-                                .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                                .requestMatchers("/oauth2/**", "/login/oauth2/**", "/login/oauth2/code/*").permitAll()
                                 .requestMatchers("/api/group/**").permitAll()
                                 .requestMatchers("/api/user/**").permitAll()
                                 .requestMatchers("/api/oauth2/sign-up").hasRole("GUEST")
@@ -93,7 +93,8 @@ public class SecurityConfig {
                                 .baseUri("/oauth2/authorization")
                                 .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
                         )
-                        .redirectionEndpoint(Customizer.withDefaults())
+                        .redirectionEndpoint(endpoint -> endpoint
+                                .baseUri("/login/oauth2/code/*"))
                 .successHandler(oAuth2LoginSuccessHandler) // 동의하고 계속하기를 눌렀을 때 Handler 설정
                 .failureHandler(oAuth2LoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
                 .userInfoEndpoint(userInfoEndpoint -> userInfoEndpoint
