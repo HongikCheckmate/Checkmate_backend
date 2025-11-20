@@ -60,4 +60,16 @@ public class Group {
                 .build();
         this.groupMembers.add(gm);
     }
+
+    public void removeMember(SiteUser user) {
+        GroupMember target = this.groupMembers.stream()
+                .filter(gm -> gm.getUser().equals(user))
+                .findFirst()
+                .orElse(null);
+
+        if (target != null) {
+            target.setGroup(null);
+            this.groupMembers.remove(target);
+        }
+    }
 }

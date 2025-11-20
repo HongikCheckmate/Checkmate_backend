@@ -15,6 +15,9 @@ import project.project1.group.GroupService;
 import project.project1.group.dto.GroupUpdateRequestDto;
 import project.project1.group.dto.MembersResponseDto;
 import project.project1.group.member.GroupMemberService;
+import project.project1.user.SiteUser;
+import project.project1.user.UserRepository;
+import project.project1.user.UserService;
 
 import java.util.Optional;
 
@@ -27,6 +30,8 @@ public class GroupManageAPIController {
     private final GroupRepository groupRepository;
     private final GroupService groupService;
     private final GroupMemberService groupMemberService;
+    private final UserRepository userRepository;
+    private final UserService userService;
 
     @GetMapping("/{groupId}")
     public ResponseEntity<?> info(
@@ -76,7 +81,7 @@ public class GroupManageAPIController {
         } else if(g.getGroupMembers().size() > 1) {
             return handleBadRequest(new IllegalArgumentException("그룹장을 제외한 멤버가 없어야 그룹을 삭제할 수 있습니다."));
         } else{
-            // TODO : 그룹을 제거할 때, 그룹에 유저가 없어야하므로, 방장도 그룹에서 탈퇴처리
+            groupService.removeUserFromGroup(g.getId(), g.getLeader().getId());
             groupRepository.deleteById(groupId);
             return ResponseEntity.ok().build();
         }
@@ -117,6 +122,9 @@ public class GroupManageAPIController {
 
         Group g = group.get();
 
+        SiteUser user = userService.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("유저 찾기 실패"));
+
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -127,14 +135,12 @@ public class GroupManageAPIController {
             if(isLeader){
                 return handleBadRequest(new IllegalArgumentException("그룹장은 탈퇴할 수 없습니다. 그룹장을 위임하거나, 그룹 삭제 기능을 이용해주세요."));
             } else {
-                // TODO : 본인 탈퇴 처리
-                // groupMemberService.removeMemberFromGroup(groupId, username);
+                groupService.removeUserFromGroup(user.getId(), g.getId());
             }
 
         } else {
             if(isLeader){
-                // TODO : username 강퇴 처리
-                // groupMemberService.removeMemberFromGroup(groupId, username);
+                groupService.removeUserFromGroup(user.getId(), g.getId());
             } else {
                 return handleForbidden(new ForbiddenException("강제 퇴장은 그룹장만 가능합니다."));
             }

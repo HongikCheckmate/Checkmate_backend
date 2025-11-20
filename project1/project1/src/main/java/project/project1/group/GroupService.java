@@ -130,6 +130,23 @@ public class GroupService {
         groupRepository.save(group);
     }
 
+    public void removeUserFromGroup(Long groupId, Long userId){
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("그룹 없음"));
+
+        SiteUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+
+        boolean alreadyExists = groupMemberRepository.existsByGroup_IdAndUser_Id(groupId, userId);
+
+        if (!alreadyExists) {
+            throw new IllegalStateException("그룹에 존재하지 않는 유저");
+        }
+
+        group.removeMember(user);
+        groupRepository.save(group);
+    }
+
     public Group findById(Long groupId) {
         return groupRepository.findById(groupId)
                 .orElseThrow(() -> new IllegalArgumentException("Group not found: " + groupId));
