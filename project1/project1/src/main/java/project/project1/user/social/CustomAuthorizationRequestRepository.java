@@ -15,6 +15,7 @@ public class CustomAuthorizationRequestRepository implements AuthorizationReques
     private final ObjectMapper objectMapper = new ObjectMapper();
     public static final String REDIRECT_URI_PARAM_COOKIE_NAME = "redirect_uri";
 
+
     @Override
     public OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
         return CookieUtils.getCookie(request, COOKIE_NAME)
@@ -36,6 +37,7 @@ public class CustomAuthorizationRequestRepository implements AuthorizationReques
         // 요청에서 redirect_uri 파라미터 추출
         String redirectUriAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
         if (redirectUriAfterLogin != null) {
+            redirectUriAfterLogin = redirectUriAfterLogin.replace(";", "");
             CookieUtils.addCookie(response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUriAfterLogin, 180);
         }
 
