@@ -47,6 +47,7 @@ public class Group {
     private SiteUser leader;
 
     @Getter
+    @Builder.Default
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<GroupMember> groupMembers = new HashSet<>();
