@@ -10,6 +10,20 @@ import java.util.Base64;
 import java.util.Optional;
 
 public class CookieUtils {
+
+    public static String normalizeRedirectUri(String redirectUri) {
+        if (redirectUri == null || redirectUri.isBlank()) {
+            return redirectUri;
+        }
+
+        // 마지막에 / 가 있으면 제거
+        if (redirectUri.endsWith("/")) {
+            return redirectUri.substring(0, redirectUri.length() - 1);
+        }
+
+        return redirectUri;
+    }
+
     public static Optional<Cookie> getCookie(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null && cookies.length > 0) {
@@ -26,6 +40,10 @@ public class CookieUtils {
      * 응답에 쿠키를 추가합니다.
      */
     public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
+        if (name.equals("redirect_uri")) {
+            value = normalizeRedirectUri(value);
+        }
+
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .path("/")
                 .httpOnly(true)

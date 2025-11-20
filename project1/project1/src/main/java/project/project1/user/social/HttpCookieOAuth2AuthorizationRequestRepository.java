@@ -47,6 +47,7 @@ public class HttpCookieOAuth2AuthorizationRequestRepository implements Authoriza
         // 프론트엔드에서 ?redirect_uri=... 로 전달한 최종 목적지 URL을 쿠키에 함께 저장
         String redirectUriAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
         if (StringUtils.hasText(redirectUriAfterLogin)) {
+            redirectUriAfterLogin = CookieUtils.normalizeRedirectUri(redirectUriAfterLogin);
             CookieUtils.addCookie(response,
                     REDIRECT_URI_PARAM_COOKIE_NAME,
                     redirectUriAfterLogin,
