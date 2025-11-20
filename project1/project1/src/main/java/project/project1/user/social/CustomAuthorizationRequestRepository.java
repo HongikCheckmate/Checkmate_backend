@@ -28,8 +28,8 @@ public class CustomAuthorizationRequestRepository implements AuthorizationReques
                                          HttpServletResponse response) {
 
         if (authorizationRequest == null) {
-            deleteCookie(request, response, COOKIE_NAME);
-            deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
+            CookieUtils.deleteCookie(request, response, COOKIE_NAME);
+            CookieUtils.deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
             return;
         }
 
@@ -48,9 +48,14 @@ public class CustomAuthorizationRequestRepository implements AuthorizationReques
     public OAuth2AuthorizationRequest removeAuthorizationRequest(HttpServletRequest request,
                                                                  HttpServletResponse response) {
         OAuth2AuthorizationRequest requestData = loadAuthorizationRequest(request);
-        deleteCookie(request, response, COOKIE_NAME);
-        deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
+        CookieUtils.deleteCookie(request, response, COOKIE_NAME);
+
         return requestData;
+    }
+
+    public void clearCookies(HttpServletRequest request, HttpServletResponse response) {
+        CookieUtils.deleteCookie(request, response, COOKIE_NAME);
+        CookieUtils.deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
     }
 
     private String serialize(OAuth2AuthorizationRequest authorizationRequest) {
@@ -70,14 +75,4 @@ public class CustomAuthorizationRequestRepository implements AuthorizationReques
             throw new IllegalArgumentException("Failed to deserialize OAuth2AuthorizationRequest", e);
         }
     }
-
-    private void deleteCookie(HttpServletRequest request, HttpServletResponse response, String name) {
-        CookieUtils.deleteCookie(request, response, name);
-    }
-
-    public void removeAuthorizationRequestCookies(HttpServletRequest request, HttpServletResponse response) {
-        deleteCookie(request, response, COOKIE_NAME);
-        CookieUtils.deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
-    }
-
 }

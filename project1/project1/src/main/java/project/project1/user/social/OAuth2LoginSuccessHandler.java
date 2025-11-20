@@ -17,7 +17,6 @@ import project.project1.user.jwt.JwtService;
 
 import java.io.IOException;
 
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -61,12 +60,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .build()
                 .toUriString();
 
-        clearAuthenticationAttributes(request, response);
+        authorizationRequestRepository.clearCookies(request, response);
 
         response.sendRedirect(targetUrl);
 
-    }
-    private void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
-        authorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
     }
 }
