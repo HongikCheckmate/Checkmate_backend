@@ -29,10 +29,7 @@ import project.project1.user.json.LoginFailureHandler;
 import project.project1.user.json.LoginSuccessHandler;
 import project.project1.user.jwt.JwtAuthenticationProcessingFilter;
 import project.project1.user.jwt.JwtService;
-import project.project1.user.social.CustomOAuth2UserService;
-import project.project1.user.social.OAuth2LoginFailureHandler;
-import project.project1.user.social.OAuth2LoginSuccessHandler;
-import project.project1.user.social.HttpCookieOAuth2AuthorizationRequestRepository;
+import project.project1.user.social.*;
 
 import java.util.Arrays;
 
@@ -47,7 +44,7 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
+    private final CustomAuthorizationRequestRepository customAuthorizationRequestRepository;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -91,7 +88,7 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(auth -> auth
                                 .baseUri("/oauth2/authorization")
-                                .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
+                                .authorizationRequestRepository(customAuthorizationRequestRepository)
                         )
                         .redirectionEndpoint(endpoint -> endpoint
                                 .baseUri("/login/oauth2/code/*"))

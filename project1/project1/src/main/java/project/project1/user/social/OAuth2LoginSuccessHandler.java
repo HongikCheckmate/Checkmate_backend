@@ -17,7 +17,6 @@ import project.project1.user.jwt.JwtService;
 
 import java.io.IOException;
 
-import static project.project1.user.social.HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME;
 
 @Slf4j
 @Component
@@ -25,7 +24,7 @@ import static project.project1.user.social.HttpCookieOAuth2AuthorizationRequestR
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtService jwtService;
     private final UserRepository userRepository;
-    private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
+    private final CustomAuthorizationRequestRepository authorizationRequestRepository;
 
     @Value("${app.frontend.url}")
     private String frontendUrl;
@@ -41,7 +40,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // 신규 유저 여부 체크
         boolean isGuest = oAuth2User.getRole() == UserRole.GUEST;
-        String frontendBaseUrl = CookieUtils.getCookie(request, REDIRECT_URI_PARAM_COOKIE_NAME)
+        String frontendBaseUrl = CookieUtils.getCookie(request, CustomAuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME)
                 .map(Cookie::getValue)
                 .orElse((frontendUrl));
 
@@ -68,6 +67,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     }
     private void clearAuthenticationAttributes(HttpServletRequest request, HttpServletResponse response) {
-        httpCookieOAuth2AuthorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
+        authorizationRequestRepository.removeAuthorizationRequestCookies(request, response);
     }
 }

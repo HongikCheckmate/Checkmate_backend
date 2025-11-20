@@ -60,20 +60,4 @@ public class CookieUtils {
             }
         }
     }
-
-    /**
-     * 객체를 직렬화하여 문자열(Base64)로 변환합니다.
-     */
-    public static String serialize(Object object) {
-        return Base64.getUrlEncoder()
-                .encodeToString(SerializationUtils.serialize(object));
-    }
-
-    /**
-     * 쿠키 값(문자열)을 객체로 역직렬화합니다.
-     */
-    public static <T> T deserialize(Cookie cookie, Class<T> cls) {
-        return cls.cast(SerializationUtils.deserialize(
-                Base64.getUrlDecoder().decode(cookie.getValue())));
-    }
 }
