@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.SerializationUtils;
 
 import java.util.Base64;
 
@@ -37,7 +38,6 @@ public class CustomAuthorizationRequestRepository implements AuthorizationReques
         // 요청에서 redirect_uri 파라미터 추출
         String redirectUriAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
         if (redirectUriAfterLogin != null) {
-            redirectUriAfterLogin = redirectUriAfterLogin.replace(";", "");
             CookieUtils.addCookie(response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUriAfterLogin, 180);
         }
 
@@ -61,20 +61,15 @@ public class CustomAuthorizationRequestRepository implements AuthorizationReques
     }
 
     private String serialize(OAuth2AuthorizationRequest authorizationRequest) {
-        try {
-            byte[] data = objectMapper.writeValueAsBytes(authorizationRequest);
-            return Base64.getUrlEncoder().encodeToString(data);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to serialize OAuth2AuthorizationRequest", e);
-        }
+        return Base64.getUrlEncoder().encodeToString(
+                SerializationUtils.serialize(authorizationRequest)
+        );
     }
 
+    // 역직렬화: Base64 String -> Byte Array -> Java Object
     private OAuth2AuthorizationRequest deserialize(String value) {
-        try {
-            byte[] decoded = Base64.getUrlDecoder().decode(value);
-            return objectMapper.readValue(decoded, OAuth2AuthorizationRequest.class);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to deserialize OAuth2AuthorizationRequest", e);
-        }
+        return (OAuth2AuthorizationRequest) SerializationUtils.deserialize(
+                Base64.getUrlDecoder().decode(value)
+        );
     }
 }
