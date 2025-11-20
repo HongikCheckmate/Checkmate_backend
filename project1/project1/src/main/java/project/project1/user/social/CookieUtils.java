@@ -28,7 +28,7 @@ public class CookieUtils {
     public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .path("/")
-                .httpOnly(false)
+                .httpOnly(true)
                 .maxAge(maxAge)
 //                .sameSite("Lax") // localhost 개발 환경을 위한 SameSite 설정
                  .secure(true) // 배포 시(HTTPS)에는 "None"과 함께 이 옵션을 켜야 합니다.
@@ -48,7 +48,7 @@ public class CookieUtils {
                 if (cookie.getName().equals(name)) {
                     ResponseCookie deleteCookie = ResponseCookie.from(name, "")
                             .path("/")
-                            .httpOnly(false)
+                            .httpOnly(true)
                             .maxAge(0) // 만료 시간을 0으로 설정
                             //.sameSite("Lax") // 추가 (addCookie와 동일하게)
                              .secure(true) // 배포 시(HTTPS) 추가
