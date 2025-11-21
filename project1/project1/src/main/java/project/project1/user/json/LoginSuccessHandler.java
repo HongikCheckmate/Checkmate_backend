@@ -36,7 +36,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler  
         SiteUser siteuser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없음"));
 
-        String accessToken = jwtService.createAccessToken(siteuser.getId(), username); // JwtService의 createAccessToken을 사용하여 AccessToken 발급
+        String accessToken = jwtService.createAccessToken(siteuser.getId(), username,siteuser.getRole().getKey()); // JwtService의 createAccessToken을 사용하여 AccessToken 발급
         String refreshToken = jwtService.createRefreshToken(); // JwtService의 createRefreshToken을 사용하여 RefreshToken 발급
 
         userRepository.findByUsername(username)
@@ -56,6 +56,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler  
         responseData.put("id", siteuser.getId());
         responseData.put("username", siteuser.getUsername());
         objectMapper.writeValue(response.getWriter(), responseData);
+        responseData.put("role", siteuser.getRole().getKey());
 
         log.info("로그인에 성공하였습니다. 아이디 : {}", username);
         log.info("로그인에 성공하였습니다. AccessToken : {}", accessToken);

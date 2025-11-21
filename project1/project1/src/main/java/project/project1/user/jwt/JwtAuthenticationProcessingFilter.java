@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +23,8 @@ import project.project1.user.UserRepository;
 import project.project1.user.social.PasswordUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Jwt 인증 필터
@@ -80,22 +84,30 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
             userRepository.findByRefreshToken(refreshToken)
                     .ifPresent(user -> {
                         String reIssuedRefreshToken = reIssueRefreshToken(user);
-                        jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getId(), user.getUsername()),
+                        String accessToken = jwtService.createAccessToken(
+                                user.getId(),
+                                user.getUsername(),
+                                user.getRole().getKey()
+                        );
+                        jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getId(), user.getUsername(), user.getRole().getKey()),
                                 reIssuedRefreshToken);
                     });
         }
-
-
         checkAccessTokenAndAuthentication(request, response, filterChain);
-
     }
 
     //[리프레시 토큰으로 유저 정보 찾기 & 액세스 토큰/리프레시 토큰 재발급 메소드]
     public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
+
         userRepository.findByRefreshToken(refreshToken)
                 .ifPresent(user -> {
                     String reIssuedRefreshToken = reIssueRefreshToken(user);
-                    jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getId(), user.getUsername()),
+                    String accessToken = jwtService.createAccessToken(
+                            user.getId(),
+                            user.getUsername(),
+                            user.getRole().getKey() // Role 문자열
+                    );
+                    jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getId(), user.getUsername(), user.getRole().getKey()),
                             reIssuedRefreshToken);
                 });
     }
@@ -123,9 +135,10 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                                         .ifPresentOrElse(
                                                 username -> {
                                                     log.info("사용자명 추출 성공: {}", username);
+                                                    String role = jwtService.extractRole(accessToken).orElse("ROLE_USER");
                                                     userRepository.findByUsername(username)
                                                             .ifPresentOrElse(
-                                                                    this::saveAuthentication,
+                                                                    user -> saveAuthentication(user, role),
                                                                     () -> log.warn("DB에 해당 사용자({})가 없습니다.", username)
                                                             );
                                                 },
@@ -141,7 +154,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    public void saveAuthentication(SiteUser myUser) {
+    public void saveAuthentication(SiteUser myUser, String role) {
         log.info("{} 사용자의 인증 정보를 저장합니다.", myUser.getUsername());
         String password = myUser.getPassword();
         if (password == null) { // 소셜 로그인 유저의 비밀번호 임의로 설정 하여 소셜 로그인 유저도 인증 되도록 설정
@@ -149,11 +162,14 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         }
         CustomUserDetails userDetails = new CustomUserDetails(myUser);
 
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(role));
+
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
-                        userDetails, // <--- 수정된 부분!
+                        userDetails,
                         null,
-                        userDetails.getAuthorities());
+                        authorities);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.info("SecurityContext에 인증 정보 저장을 완료했습니다.");

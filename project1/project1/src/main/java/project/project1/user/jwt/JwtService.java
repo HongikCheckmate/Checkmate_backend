@@ -42,6 +42,7 @@ public class JwtService {
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String USERNAME_CLAIM = "username";
+    private static final String ROLE_CLAIM = "role";
     private static final String BEARER = "Bearer ";
 
     private final project.project1.user.UserRepository userRepository;
@@ -49,7 +50,7 @@ public class JwtService {
     /**
      * AccessToken 생성 메소드
      */
-    public String createAccessToken(Long userId, String username) {
+    public String createAccessToken(Long userId, String username, String role) {
         Date now = new Date();
         return JWT.create() // JWT 토큰을 생성하는 빌더 반환
                 .withSubject(ACCESS_TOKEN_SUBJECT) // JWT의 Subject 지정 -> AccessToken이므로 AccessToken
@@ -58,6 +59,7 @@ public class JwtService {
                 //클레임으로는 저희는 username 하나만 사용 추가시 .withClaim(클래임 이름, 클래임 값) 으로 설정해주시면 됩니다
                 .withClaim(USERNAME_CLAIM, username)
                 .withClaim("userId", userId)
+                .withClaim(ROLE_CLAIM, role)
                 .sign(Algorithm.HMAC512(secretkey)); // HMAC512 알고리즘 사용, application-jwt.yml에서 지정한 secret 키로 암호화
     }
 
@@ -92,6 +94,19 @@ public class JwtService {
         setAccessTokenHeader(response, accessToken);
         setRefreshTokenHeader(response, refreshToken);
         log.info("Access Token, Refresh Token 헤더 설정 완료");
+    }
+
+    public Optional<String> extractRole(String accessToken) {
+        try {
+            return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secretkey))
+                    .build()
+                    .verify(accessToken)
+                    .getClaim(ROLE_CLAIM)
+                    .asString());
+        } catch (Exception e) {
+            log.error("액세스 토큰에서 Role 추출 실패");
+            return Optional.empty();
+        }
     }
 
     /**
