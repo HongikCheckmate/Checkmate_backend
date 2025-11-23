@@ -55,6 +55,7 @@ public class GoalServiceImpl implements GoalService {
                             addMembersToCountGoal(solvedAcGoal, group.getGroupMembers());
 
                         } else if (dto.getProblemGoalType() == ProblemGoalType.SPECIFIC) {
+                            addBasicMembersToGoal(solvedAcGoal, group.getGroupMembers());
 
                             // DTO에서 List<Integer>를 가져옵니다. (예: [1000, 1001])
                             List<Integer> problemIdList = dto.getTargetProblems();
@@ -79,6 +80,7 @@ public class GoalServiceImpl implements GoalService {
                     case GITHUB:
                         GithubGoal githubGoal = new GithubGoal();
                         githubGoal.setTargetRepository(dto.getTargetRepository());
+                        addBasicMembersToGoal(githubGoal, group.getGroupMembers());
                         goal = githubGoal;
                         break;
                     default:
@@ -87,6 +89,10 @@ public class GoalServiceImpl implements GoalService {
                 break;
             default:
                 throw new IllegalArgumentException("알 수 없는 인증 타입입니다.");
+        }
+        if (goal.getMembers().isEmpty() &&
+                (goal instanceof TextGoal || goal instanceof ImageGoal || goal instanceof VideoGoal)) {
+            addBasicMembersToGoal(goal, group.getGroupMembers());
         }
 
         goal.setName(dto.getName());
@@ -119,6 +125,28 @@ public class GoalServiceImpl implements GoalService {
             goalMember.setStartCount(startCount);
 
             // 4. 추가
+            goal.getMembers().add(goalMember);
+        }
+    }
+
+    private void addBasicMembersToGoal(Goal goal, Set<GroupMember> groupMembers) {
+        for (GroupMember gm : groupMembers) {
+            SiteUser user = gm.getUser();
+
+            GoalMember goalMember;
+
+            // SolvedAcGoal인 경우 (SPECIFIC 모드) 형변환하여 생성
+            if (goal instanceof SolvedAcGoal) {
+                goalMember = new SolvedAcGoalMember();
+                ((SolvedAcGoalMember) goalMember).setStartCount(0); // SPECIFIC은 startCount 불필요
+            } else {
+                // TEXT, IMAGE, VIDEO, GITHUB 등은 기본 GoalMember 사용
+                goalMember = new BasicGoalMember();
+            }
+
+            goalMember.setUser(user);
+            goalMember.setGoal(goal); // (Goal 엔티티의 addMember를 안 쓸 경우 이렇게 수동 설정)
+
             goal.getMembers().add(goalMember);
         }
     }
