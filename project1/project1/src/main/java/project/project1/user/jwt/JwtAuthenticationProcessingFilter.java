@@ -87,9 +87,10 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                         String accessToken = jwtService.createAccessToken(
                                 user.getId(),
                                 user.getUsername(),
-                                user.getRole().getKey()
+                                user.getRole().getKey(),
+                                user.getNickname()
                         );
-                        jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getId(), user.getUsername(), user.getRole().getKey()),
+                        jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getId(), user.getUsername(), user.getRole().getKey(), user.getNickname()),
                                 reIssuedRefreshToken);
                     });
         }
@@ -105,9 +106,10 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                     String accessToken = jwtService.createAccessToken(
                             user.getId(),
                             user.getUsername(),
-                            user.getRole().getKey() // Role 문자열
+                            user.getRole().getKey(), // Role 문자열
+                            user.getNickname()
                     );
-                    jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getId(), user.getUsername(), user.getRole().getKey()),
+                    jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getId(), user.getUsername(), user.getRole().getKey(), user.getNickname()),
                             reIssuedRefreshToken);
                 });
     }

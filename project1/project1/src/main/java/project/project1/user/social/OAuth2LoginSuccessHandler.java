@@ -34,7 +34,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         log.info("OAuth2 Login 성공!");
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
-        String accessToken = jwtService.createAccessToken(oAuth2User.getId(), oAuth2User.getUsername(), oAuth2User.getRole().getKey());
+        String accessToken = jwtService.createAccessToken(oAuth2User.getId(), oAuth2User.getUsername(), oAuth2User.getRole().getKey(), oAuth2User.getNickname());
         String refreshToken = jwtService.createRefreshToken();
 
         // 신규 유저 여부 체크

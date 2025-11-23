@@ -35,9 +35,10 @@ public class OAuthController {
         // [수정 2] User 객체에서 ID와 Role을 각각 꺼냅니다.
         Long userId = user.getId();
         String role = user.getRole().getKey(); // Enum에서 String으로 변환 (.getKey() 또는 .name())
+        String nickname = user.getNickname();
 
         // [수정 3] 꺼낸 role을 createAccessToken에 전달합니다.
-        String accessToken = jwtService.createAccessToken(userId, username, role);
+        String accessToken = jwtService.createAccessToken(userId, username, role, nickname);
         String refreshToken = jwtService.createRefreshToken();
 
         return ResponseEntity.ok(Map.of(

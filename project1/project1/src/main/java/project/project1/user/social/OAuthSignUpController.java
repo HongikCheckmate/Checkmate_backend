@@ -34,7 +34,7 @@ public class OAuthSignUpController {
         userRepository.save(user);
 
         // JWT 재발급
-        String accessToken = jwtService.createAccessToken(user.getId(), user.getUsername(), user.getRole().getKey());
+        String accessToken = jwtService.createAccessToken(user.getId(), user.getUsername(), user.getRole().getKey(), user.getNickname());
         String refreshToken = jwtService.createRefreshToken();
         jwtService.updateRefreshToken(user.getUsername(), refreshToken);
 

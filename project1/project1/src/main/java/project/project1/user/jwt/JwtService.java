@@ -50,8 +50,9 @@ public class JwtService {
     /**
      * AccessToken 생성 메소드
      */
-    public String createAccessToken(Long userId, String username, String role) {
+    public String createAccessToken(Long userId, String username, String role, String nickname) {
         Date now = new Date();
+        String safeNickname = (nickname != null) ? nickname : "";
         return JWT.create() // JWT 토큰을 생성하는 빌더 반환
                 .withSubject(ACCESS_TOKEN_SUBJECT) // JWT의 Subject 지정 -> AccessToken이므로 AccessToken
                 .withExpiresAt(new Date(now.getTime() + accessTokenExpirationPeriod)) // 토큰 만료 시간 설정
@@ -60,6 +61,7 @@ public class JwtService {
                 .withClaim(USERNAME_CLAIM, username)
                 .withClaim("userId", userId)
                 .withClaim(ROLE_CLAIM, role)
+                .withClaim("nickname", safeNickname)
                 .sign(Algorithm.HMAC512(secretkey)); // HMAC512 알고리즘 사용, application-jwt.yml에서 지정한 secret 키로 암호화
     }
 
