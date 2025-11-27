@@ -15,6 +15,5 @@ import project.project1.user.SiteUser;
 @NoArgsConstructor
 @DiscriminatorValue("SOLVED_AC")
 public class SolvedAcGoalMember extends GoalMember {
-    @Column(nullable = false)
-    private int startCount;
+    private Integer startCount;
 }
